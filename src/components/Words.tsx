@@ -1,4 +1,5 @@
 import { type Record, Tag } from "@prisma/client";
+import { useSession } from "next-auth/react";
 import React from "react";
 import { api } from "~/utils/api";
 
@@ -85,6 +86,10 @@ export const Words: React.FC = () => {
 const Word: React.FC<{ word: Record & { tags: Tag[] } }> = ({ word }) => {
   //   const tags = api.words.getTagsForWord.useQuery({ wordId: word.id });
 
+  const { status } = useSession();
+
+  const isSignedIn = status === "authenticated";
+
   return (
     <div className="flex w-full flex-row justify-between bg-base-200 px-2 pb-2">
       <div className="fkex flex-1 flex-col">
@@ -114,20 +119,22 @@ const Word: React.FC<{ word: Record & { tags: Tag[] } }> = ({ word }) => {
             />
           </svg>
         ) : (
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={1.5}
-            stroke="currentColor"
-            className="h-6 w-6"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z"
-            />
-          </svg>
+          isSignedIn && (
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={1.5}
+              stroke="currentColor"
+              className="h-6 w-6"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z"
+              />
+            </svg>
+          )
         )}
       </i>
     </div>
@@ -146,7 +153,7 @@ const Tags: React.FC<{ tags?: Tag[] }> = ({ tags }) => {
 
 const Tag: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
-    <div className="flex flex-row items-center justify-center bg-white/10 px-2 text-xs">
+    <div className="flex flex-row items-center justify-center bg-base-300 px-2 text-xs">
       {children}
     </div>
   );
