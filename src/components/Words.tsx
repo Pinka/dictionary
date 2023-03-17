@@ -173,7 +173,7 @@ const Tags: React.FC<{
         <Tag
           key={tag.id}
           isSelected={selectedTags?.some((id) => id === tag.id) ?? false}
-          onClick={() => onToggleTag(tag)}
+          onClick={onTagSelect ? () => onToggleTag(tag) : undefined}
         >
           {tag.name}
         </Tag>
@@ -190,8 +190,10 @@ const Tag: React.FC<{
   return (
     <button
       type="button"
-      className={clsx("h-6 bg-base-300 px-2  text-xs", {
+      className={clsx("h-6 bg-base-300 px-2 text-xs", {
         "border-2 border-solid border-black": isSelected,
+        // "pointer-events-none": !onClick,
+        "cursor-default": !onClick,
       })}
       onClick={onClick}
     >
