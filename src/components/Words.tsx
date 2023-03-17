@@ -17,6 +17,9 @@ export const Words: React.FC = () => {
       search,
     },
     {
+      keepPreviousData: true,
+      // cacheTime: 1000 * 60 * 60,
+      staleTime: Infinity,
       getNextPageParam: (lastPage) => {
         return lastPage && lastPage[lastPage.length - 1]?.id;
       },
@@ -31,7 +34,8 @@ export const Words: React.FC = () => {
     const handleScroll = () => {
       const currentScroll =
         window.innerHeight + document.documentElement.scrollTop;
-      const maxScroll = 0.6 * document.documentElement.offsetHeight;
+
+      const maxScroll = document.documentElement.offsetHeight - 2000;
 
       if (currentScroll >= maxScroll) {
         fetchNextPage().catch((e) => {
