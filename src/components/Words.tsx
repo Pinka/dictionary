@@ -1,10 +1,12 @@
 import { type Record, Tag } from "@prisma/client";
 import { useSession } from "next-auth/react";
-import React from "react";
+import React, { type MouseEventHandler } from "react";
 import { api } from "~/utils/api";
+import clsx from "clsx";
 
 export const Words: React.FC = () => {
   const [search, setSearch] = React.useState<string | null>(null);
+  const [selectedTags, setSelectedTags] = React.useState<number[]>([]);
 
   const {
     // status,
@@ -16,6 +18,7 @@ export const Words: React.FC = () => {
   } = api.words.getAll.useInfiniteQuery(
     {
       search,
+      tags: selectedTags,
     },
     {
       keepPreviousData: true,
@@ -27,6 +30,12 @@ export const Words: React.FC = () => {
       initialCursor: 0, // <-- optional you can pass an initialCursor
     }
   );
+
+  const { data: tagsList } = api.tags.getAll.useQuery();
+
+  const onTagSelect = (selectedTags: number[]) => {
+    setSelectedTags(selectedTags);
+  };
 
   // fetch next page when the user scrolls to the bottom of the list
   React.useEffect(() => {
@@ -74,6 +83,12 @@ export const Words: React.FC = () => {
           </svg>
         </i>
       </div>
+      <Tags
+        className="px-2"
+        tags={tagsList}
+        selectedTags={selectedTags}
+        onTagSelect={onTagSelect}
+      />
       {data?.pages
         .flatMap((p) => p)
         .flatMap((word) => (
@@ -84,23 +99,18 @@ export const Words: React.FC = () => {
 };
 
 const Word: React.FC<{ word: Record & { tags: Tag[] } }> = ({ word }) => {
-  //   const tags = api.words.getTagsForWord.useQuery({ wordId: word.id });
-
   const { status } = useSession();
-
   const isSignedIn = status === "authenticated";
 
   return (
     <div className="flex w-full flex-row justify-between bg-base-200 px-2 pb-2">
       <div className="fkex flex-1 flex-col">
-        <p className="">
+        <p>
           <span className="text-xs font-bold">{word.contentMu}</span>
           <br />
           <span className="text-xs">{word.contentEn}</span>
         </p>
-        <div className="pt-4">
-          <Tags tags={word.tags} />
-        </div>
+        <Tags className="pt-4" tags={word.tags} />
       </div>
       <i className="mr-3 flex flex-none flex-col justify-center align-middle">
         {word.audioMuUrl ? (
@@ -141,20 +151,51 @@ const Word: React.FC<{ word: Record & { tags: Tag[] } }> = ({ word }) => {
   );
 };
 
-const Tags: React.FC<{ tags?: Tag[] }> = ({ tags }) => {
+const Tags: React.FC<{
+  className?: string;
+  tags?: Tag[];
+  selectedTags?: number[];
+  onTagSelect?: (selectedTags: number[]) => void;
+}> = ({ className, tags, selectedTags, onTagSelect }) => {
+  const onToggleTag = (tag: Tag) => {
+    if (!tags) return;
+
+    if (selectedTags?.some((id) => id === tag.id)) {
+      onTagSelect?.(selectedTags.filter((id) => id !== tag.id));
+    } else {
+      onTagSelect?.([...(selectedTags ?? []), tag.id]);
+    }
+  };
+
   return (
-    <div className="flex flex-row gap-2">
+    <div className={clsx("flex w-full flex-row gap-2", className)}>
       {tags?.map((tag) => (
-        <Tag key={tag.id}>{tag.name}</Tag>
+        <Tag
+          key={tag.id}
+          isSelected={selectedTags?.some((id) => id === tag.id) ?? false}
+          onClick={() => onToggleTag(tag)}
+        >
+          {tag.name}
+        </Tag>
       ))}
     </div>
   );
 };
 
-const Tag: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+const Tag: React.FC<{
+  isSelected: boolean;
+  children: React.ReactNode;
+  onClick?: MouseEventHandler;
+}> = ({ isSelected, children, onClick }) => {
   return (
-    <div className="flex flex-row items-center justify-center bg-base-300 px-2 text-xs">
+    <button
+      type="button"
+      className={clsx("h-6 bg-base-300 px-2  text-xs", {
+        "border-2 border-solid border-black": isSelected,
+      })}
+      onClick={onClick}
+    >
       {children}
-    </div>
+    </button>
   );
 };

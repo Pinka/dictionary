@@ -9,10 +9,14 @@ import {
 export const wordsRouter = createTRPCRouter({
   getAll: publicProcedure
     .input(
-      z.object({ search: z.string().nullable(), cursor: z.number().nullable() })
+      z.object({
+        search: z.string().nullable(),
+        cursor: z.number().nullable(),
+        tags: z.array(z.number()).nullable(),
+      })
     )
     .query(({ ctx, input }) => {
-      const { search, cursor } = input;
+      const { search, cursor, tags } = input;
 
       return ctx.prisma.record.findMany({
         orderBy: [
@@ -51,37 +55,22 @@ export const wordsRouter = createTRPCRouter({
               },
             }
           : {}),
-      });
-    }),
-
-  getTagsForWord: publicProcedure
-    .input(z.object({ wordId: z.number().nullable() }))
-    .query(({ ctx, input }) => {
-      if (input.wordId) {
-        return ctx.prisma.tag.findMany({
-          where: {
-            records: {
-              some: {
-                id: input.wordId,
+        ...(tags && tags.length > 0
+          ? {
+              where: {
+                tags: {
+                  some: {
+                    id: {
+                      in: tags,
+                    },
+                  },
+                },
               },
-            },
-          },
-          orderBy: [
-            {
-              name: "asc",
-            },
-          ],
-        });
-      }
-
-      return ctx.prisma.tag.findMany({
-        orderBy: [
-          {
-            name: "asc",
-          },
-        ],
+            }
+          : {}),
       });
     }),
+
   getSecretMessage: protectedProcedure.query(() => {
     return "you can now see this secret message!";
   }),
