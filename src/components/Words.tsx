@@ -192,7 +192,6 @@ const Tag: React.FC<{
       type="button"
       className={clsx("h-6 bg-base-300 px-2 text-xs", {
         "border-2 border-solid border-black": isSelected,
-        // "pointer-events-none": !onClick,
         "cursor-default": !onClick,
       })}
       onClick={onClick}
