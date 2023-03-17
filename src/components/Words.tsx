@@ -22,7 +22,6 @@ export const Words: React.FC = () => {
     },
     {
       keepPreviousData: true,
-      // cacheTime: 1000 * 60 * 60,
       staleTime: Infinity,
       getNextPageParam: (lastPage) => {
         return lastPage && lastPage[lastPage.length - 1]?.id;
