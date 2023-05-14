@@ -38,6 +38,7 @@ model Account {
     user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
     @@unique([provider, providerAccountId])
+    @@index([userId])
 }
 
 model Session {
@@ -46,6 +47,8 @@ model Session {
     userId       String
     expires      DateTime
     user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@index([userId])
 }
 
 model User {
@@ -56,6 +59,8 @@ model User {
     image         String?
     accounts      Account[]
     sessions      Session[]
+    posts         Post[]
+    votes         Vote[]
 }
 
 model VerificationToken {
@@ -69,13 +74,14 @@ model VerificationToken {
 ///////////////////////////////////
 
 model Record {
-    id          Int       @id @default(autoincrement())
-    contentEn   String    @db.VarChar(255)
-    contentMu   String?   @db.VarChar(255)
-    audioMuUrl  String?   @db.VarChar(255)
-    dateCreated DateTime? @default(now())
-    dateUpdated DateTime? @updatedAt
+    id          Int           @id @default(autoincrement())
+    contentEn   String        @db.VarChar(255)
+    contentMu   String?       @db.VarChar(255)
+    audioMuUrl  String?       @db.VarChar(255)
+    dateCreated DateTime?     @default(now())
+    dateUpdated DateTime?     @updatedAt
     tags        Tag[]
+    recordAudio RecordAudio[]
 }
 
 model Tag {
@@ -84,4 +90,49 @@ model Tag {
     dateCreated DateTime? @default(now())
     dateUpdated DateTime? @updatedAt
     records     Record[]
+}
+
+// Model for holding record audio keys
+model RecordAudio {
+    id          Int       @id @default(autoincrement())
+    recordId    Int
+    url         String    @unique @map("audioUrl") @db.VarChar(512)
+    fileName    String?   @db.VarChar(255)
+    dateCreated DateTime? @default(now())
+    dateUpdated DateTime? @updatedAt
+    record      Record    @relation(fields: [recordId], references: [id], onDelete: Cascade)
+    votes       Vote[]
+
+    @@index([recordId])
+}
+
+// Model for holding votes for audio
+model Vote {
+    id            Int         @id @default(autoincrement())
+    recordAudioId Int
+    userId        String
+    dateCreated   DateTime?   @default(now())
+    dateUpdated   DateTime?   @updatedAt
+    recordAudio   RecordAudio @relation(fields: [recordAudioId], references: [id], onDelete: Cascade)
+    user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@index([recordAudioId])
+    @@index([userId])
+}
+
+/////////////////////////////////////////////
+// Diary Models
+/////////////////////////////////////////////
+
+model Post {
+    id          Int       @id @default(autoincrement())
+    title       String    @db.VarChar(255)
+    content     String    @db.VarChar(255)
+    dateCreated DateTime? @default(now())
+    dateUpdated DateTime? @updatedAt
+
+    userId String
+    user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@index([userId])
 }

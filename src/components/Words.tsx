@@ -1,8 +1,7 @@
-import { type Record, Tag } from "@prisma/client";
-import { useSession } from "next-auth/react";
-import React, { type MouseEventHandler } from "react";
+import React from "react";
 import { api } from "~/utils/api";
-import clsx from "clsx";
+import { Word } from "./Word";
+import { Tags } from "./Tags";
 
 export const Words: React.FC = () => {
   const [search, setSearch] = React.useState<string | null>(null);
@@ -15,6 +14,7 @@ export const Words: React.FC = () => {
     isFetchingNextPage,
     fetchNextPage,
     hasNextPage,
+    refetch,
   } = api.words.getAll.useInfiniteQuery(
     {
       search,
@@ -34,6 +34,12 @@ export const Words: React.FC = () => {
 
   const onTagSelect = (selectedTags: number[]) => {
     setSelectedTags(selectedTags);
+  };
+
+  const onWordChange = () => {
+    refetch().catch((e) => {
+      console.error(e);
+    });
   };
 
   // fetch next page when the user scrolls to the bottom of the list
@@ -91,111 +97,8 @@ export const Words: React.FC = () => {
       {data?.pages
         .flatMap((p) => p)
         .flatMap((word) => (
-          <Word key={word.id} word={word} />
+          <Word key={word.id} word={word} onChange={onWordChange} />
         ))}
     </div>
-  );
-};
-
-const Word: React.FC<{ word: Record & { tags: Tag[] } }> = ({ word }) => {
-  const { status } = useSession();
-  const isSignedIn = status === "authenticated";
-
-  return (
-    <div className="flex w-full flex-row justify-between bg-base-200 px-2 pb-2">
-      <div className="fkex flex-1 flex-col">
-        <p>
-          <span className="text-xs font-bold">{word.contentMu}</span>
-          <br />
-          <span className="text-xs">{word.contentEn}</span>
-        </p>
-        <Tags className="pt-4" tags={word.tags} />
-      </div>
-      <i className="mr-3 flex flex-none flex-col justify-center align-middle">
-        {word.audioMuUrl ? (
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={1.5}
-            stroke="currentColor"
-            className="h-6 w-6"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z"
-            />
-          </svg>
-        ) : (
-          isSignedIn && (
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={1.5}
-              stroke="currentColor"
-              className="h-6 w-6"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z"
-              />
-            </svg>
-          )
-        )}
-      </i>
-    </div>
-  );
-};
-
-const Tags: React.FC<{
-  className?: string;
-  tags?: Tag[];
-  selectedTags?: number[];
-  onTagSelect?: (selectedTags: number[]) => void;
-}> = ({ className, tags, selectedTags, onTagSelect }) => {
-  const onToggleTag = (tag: Tag) => {
-    if (!tags) return;
-
-    if (selectedTags?.some((id) => id === tag.id)) {
-      onTagSelect?.(selectedTags.filter((id) => id !== tag.id));
-    } else {
-      onTagSelect?.([...(selectedTags ?? []), tag.id]);
-    }
-  };
-
-  return (
-    <div className={clsx("flex w-full flex-row gap-2", className)}>
-      {tags?.map((tag) => (
-        <Tag
-          key={tag.id}
-          isSelected={selectedTags?.some((id) => id === tag.id) ?? false}
-          onClick={onTagSelect ? () => onToggleTag(tag) : undefined}
-        >
-          {tag.name}
-        </Tag>
-      ))}
-    </div>
-  );
-};
-
-const Tag: React.FC<{
-  isSelected: boolean;
-  children: React.ReactNode;
-  onClick?: MouseEventHandler;
-}> = ({ isSelected, children, onClick }) => {
-  return (
-    <button
-      type="button"
-      className={clsx("h-6 bg-base-300 px-2 text-xs", {
-        "border-2 border-solid border-black": isSelected,
-        "cursor-default": !onClick,
-      })}
-      onClick={onClick}
-    >
-      {children}
-    </button>
   );
 };
