@@ -17,6 +17,7 @@
     "@trpc/next": "^10.9.0",
     "@trpc/react-query": "^10.9.0",
     "@trpc/server": "^10.9.0",
+    "@vercel/analytics": "^1.0.1",
     "aws-sdk": "^2.1353.0",
     "clsx": "^1.2.1",
     "daisyui": "^2.51.3",
