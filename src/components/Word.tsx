@@ -6,19 +6,28 @@ import { type LongPressCallback, useLongPress } from "use-long-press";
 import { RecordAnimation } from "./RecordAnimation";
 import { api } from "~/utils/api";
 import { v4 as guid } from "uuid";
+import { DeleteIcon } from "./DeleteIcon";
+import LoadingIcon from "./LoadingIcon";
+import { MicIcon } from "./MicIcon";
+
+export type FullRecord = Record & { tags: Tag[]; recordAudio: RecordAudio[] };
 
 export const Word: React.FC<{
-  word: Record & { tags: Tag[]; recordAudio: RecordAudio[] };
-  onChange: () => void;
+  word: FullRecord;
+  onChange: (word: FullRecord) => void;
 }> = ({ word, onChange }) => {
   const apiContext = api.useContext();
 
   const [isRecording, setIsRecording] = React.useState(false);
 
+  // state for showing the audio save progress while saving
+  const [savingAudioForWordId, setSavingAudioForWordId] = React.useState(0);
+
   const mediaRecorder = React.useRef<MediaRecorder>();
   const chunks = React.useRef<Blob[]>([]);
 
   const saveAudio = api.words.saveAudio.useMutation();
+  const deleteAudio = api.words.deleteAudio.useMutation();
 
   const onStartRecord: LongPressCallback<HTMLButtonElement, unknown> = () => {
     setIsRecording(true);
@@ -45,6 +54,8 @@ export const Word: React.FC<{
           mediaRecorder.current.addEventListener("stop", () => {
             stream.getTracks().forEach((track) => track.stop());
             mediaRecorder.current = undefined;
+
+            setSavingAudioForWordId(word.id);
 
             const blob = new Blob(chunks.current, {
               type: "audio/webm; codecs=opus",
@@ -92,12 +103,19 @@ export const Word: React.FC<{
                   fileName,
                 });
               })
-              .then(() => {
-                setIsRecording(false);
-                onChange();
+              .then((record) => {
+                if (!record) {
+                  throw new Error("Failed to save audio");
+                }
+
+                onChange(record);
               })
               .catch((e) => {
                 console.error(e);
+              })
+              .finally(() => {
+                setIsRecording(false);
+                setSavingAudioForWordId(0);
               });
           });
         }
@@ -106,6 +124,7 @@ export const Word: React.FC<{
       })
       .catch((e) => {
         console.error(e);
+        setSavingAudioForWordId(0);
       });
   };
 
@@ -124,6 +143,26 @@ export const Word: React.FC<{
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     onFinish: onStopRecord,
   });
+
+  const onDeleteAudio = (audio: RecordAudio) => {
+    if (!window.confirm("Are you sure you want to delete this audio?")) {
+      return;
+    }
+
+    const updatedRecord = {
+      ...word,
+      recordAudio: word.recordAudio.filter((a) => a.id !== audio.id),
+    };
+
+    onChange(updatedRecord);
+
+    deleteAudio
+      .mutateAsync({ wordId: audio.recordId, audioId: audio.id })
+      .catch((e) => {
+        onChange(word);
+        console.error(e);
+      });
+  };
 
   // const onPlay = (e: React.MouseEvent<HTMLButtonElement>) => {
   //   e.preventDefault();
@@ -171,33 +210,30 @@ export const Word: React.FC<{
             className="mr-3 flex flex-none flex-col justify-center align-middle"
             {...bindLongPress()}
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={1.5}
-              stroke="currentColor"
-              className="h-6 w-6"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z"
-              />
-            </svg>
+            {savingAudioForWordId === word.id ? <LoadingIcon /> : <MicIcon />}
           </button>
         </div>
         {word.recordAudio && word.recordAudio.length > 0 && (
           <div className="mt-2 flex w-full flex-col gap-2">
             <hr />
             {word.recordAudio.map((audio) => (
-              <audio
-                key={audio.url}
-                controls
-                src={audio.url}
-                className="h-8 w-full"
-                preload="metadata"
-              />
+              <div key={audio.url} className="flex flex-row">
+                <audio
+                  controls
+                  src={audio.url}
+                  className="h-8 w-full"
+                  preload="metadata"
+                />
+                <button
+                  type="button"
+                  title="Delete"
+                  className="mr-3 flex flex-none flex-col justify-center align-middle disabled:text-zinc-400"
+                  onClick={() => onDeleteAudio(audio)}
+                  disabled={word.recordAudio.length === 1}
+                >
+                  <DeleteIcon />
+                </button>
+              </div>
             ))}
           </div>
         )}

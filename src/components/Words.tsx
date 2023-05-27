@@ -1,34 +1,30 @@
 import React from "react";
 import { api } from "~/utils/api";
-import { Word } from "./Word";
+import { type FullRecord, Word } from "./Word";
 import { Tags } from "./Tags";
+import LoadingIcon from "./LoadingIcon";
 
 export const Words: React.FC = () => {
   const [search, setSearch] = React.useState<string | null>(null);
   const [selectedTags, setSelectedTags] = React.useState<number[]>([]);
 
-  const {
-    // status,
-    data,
-    // isFetching,
-    isFetchingNextPage,
-    fetchNextPage,
-    hasNextPage,
-    refetch,
-  } = api.words.getAll.useInfiniteQuery(
-    {
-      search,
-      tags: selectedTags,
-    },
-    {
-      keepPreviousData: true,
-      staleTime: Infinity,
-      getNextPageParam: (lastPage) => {
-        return lastPage && lastPage[lastPage.length - 1]?.id;
+  const apiContext = api.useContext();
+
+  const { data, isFetching, isFetchingNextPage, fetchNextPage, hasNextPage } =
+    api.words.getAll.useInfiniteQuery(
+      {
+        search,
+        tags: selectedTags,
       },
-      initialCursor: 0, // <-- optional you can pass an initialCursor
-    }
-  );
+      {
+        keepPreviousData: true,
+        staleTime: Infinity,
+        getNextPageParam: (lastPage) => {
+          return lastPage && lastPage[lastPage.length - 1]?.id;
+        },
+        initialCursor: 0, // <-- optional you can pass an initialCursor
+      }
+    );
 
   const { data: tagsList } = api.tags.getAll.useQuery();
 
@@ -36,10 +32,24 @@ export const Words: React.FC = () => {
     setSelectedTags(selectedTags);
   };
 
-  const onWordChange = () => {
-    refetch().catch((e) => {
-      console.error(e);
-    });
+  const onWordUpdate = (record: FullRecord) => {
+    apiContext.words.getAll.setInfiniteData(
+      { search, tags: selectedTags },
+      (data) => {
+        if (!data) {
+          return {
+            pages: [],
+            pageParams: [],
+          };
+        }
+        return {
+          ...data,
+          pages: data.pages.map((page) =>
+            page.map((item) => (item.id === record.id ? record : item))
+          ),
+        };
+      }
+    );
   };
 
   // fetch next page when the user scrolls to the bottom of the list
@@ -66,27 +76,11 @@ export const Words: React.FC = () => {
     <div className="flex flex-col items-center justify-items-stretch gap-2 break-all">
       <div className="flex w-full flex-row pt-2">
         <input
-          placeholder="Search"
-          className="input-bordered input w-full"
+          placeholder="Search..."
+          className="input-bordered input w-full placeholder:italic"
           type="text"
           onChange={(e) => setSearch(e.target.value)}
         />
-        <i className="flex flex-row justify-center p-3 align-middle">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={1.5}
-            stroke="currentColor"
-            className="h-6 w-6"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
-            />
-          </svg>
-        </i>
       </div>
       <Tags
         className="px-2"
@@ -97,8 +91,14 @@ export const Words: React.FC = () => {
       {data?.pages
         .flatMap((p) => p)
         .flatMap((word) => (
-          <Word key={word.id} word={word} onChange={onWordChange} />
+          <Word key={word.id} word={word} onChange={onWordUpdate} />
         ))}
+      {isFetching && (
+        <div className="flex w-full justify-center p-4" role="status">
+          <LoadingIcon />
+          <span className="sr-only">Loading...</span>
+        </div>
+      )}
     </div>
   );
 };

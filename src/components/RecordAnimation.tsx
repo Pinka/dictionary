@@ -30,7 +30,7 @@ export const RecordAnimation: React.FC<{ title: string | null }> = ({
   // }, []);
 
   return (
-    <div className="pointer-events-none fixed top-0 left-0 flex h-full w-full flex-col items-center bg-red-200">
+    <div className="pointer-events-none fixed top-0 left-0 z-10 flex h-full w-full flex-col items-center bg-red-200">
       <h4 className="mt-40">{title}</h4>
       <div ref={waveRef}></div>
     </div>

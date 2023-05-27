@@ -1,11 +1,7 @@
 import { z } from "zod";
 import S3 from "aws-sdk/clients/s3";
 
-import {
-  createTRPCRouter,
-  publicProcedure,
-  protectedProcedure,
-} from "~/server/api/trpc";
+import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 
 const s3 = new S3({
   accessKeyId: process.env.DICTIONARY_ACCESS_KEY_ID,
@@ -18,7 +14,7 @@ export const wordsRouter = createTRPCRouter({
     .input(
       z.object({
         search: z.string().nullable(),
-        cursor: z.number().nullable(),
+        cursor: z.number().optional(),
         tags: z.array(z.number()).nullable(),
       })
     )
@@ -77,7 +73,7 @@ export const wordsRouter = createTRPCRouter({
           : {}),
       });
     }),
-  getS3UploadUrl: protectedProcedure
+  getS3UploadUrl: publicProcedure
     .input(
       z.object({
         fileName: z.string(),
@@ -99,7 +95,7 @@ export const wordsRouter = createTRPCRouter({
       return uploadURL;
     }),
 
-  saveAudio: protectedProcedure
+  saveAudio: publicProcedure
     .input(
       z.object({
         wordId: z.number(),
@@ -124,11 +120,52 @@ export const wordsRouter = createTRPCRouter({
         where: {
           id: wordId,
         },
+        include: {
+          tags: true,
+          recordAudio: true,
+        },
         data: {
           recordAudio: {
             create: {
               url: "/api/files?id=" + fileName,
               fileName,
+            },
+          },
+        },
+      });
+    }),
+  deleteAudio: publicProcedure
+    .input(
+      z.object({
+        wordId: z.number(),
+        audioId: z.number(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { wordId, audioId } = input;
+
+      const record = await ctx.prisma.record.findUnique({
+        where: {
+          id: wordId,
+        },
+      });
+
+      if (!record) {
+        throw new Error("Record not found");
+      }
+
+      return ctx.prisma.record.update({
+        where: {
+          id: wordId,
+        },
+        include: {
+          tags: true,
+          recordAudio: true,
+        },
+        data: {
+          recordAudio: {
+            delete: {
+              id: audioId,
             },
           },
         },
