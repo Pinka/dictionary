@@ -9,6 +9,7 @@ import { v4 as guid } from "uuid";
 import { DeleteIcon } from "./DeleteIcon";
 import LoadingIcon from "./LoadingIcon";
 import { MicIcon } from "./MicIcon";
+import clsx from "clsx";
 
 export type FullRecord = Record & { tags: Tag[]; recordAudio: RecordAudio[] };
 
@@ -28,6 +29,7 @@ export const Word: React.FC<{
 
   const saveAudio = api.words.saveAudio.useMutation();
   const deleteAudio = api.words.deleteAudio.useMutation();
+  const hasAudio = word.recordAudio.length > 0;
 
   const onStartRecord: LongPressCallback<HTMLButtonElement, unknown> = () => {
     setIsRecording(true);
@@ -192,7 +194,11 @@ export const Word: React.FC<{
 
   return (
     <>
-      <div className="flex w-full flex-col bg-base-200 px-2 pb-2">
+      <div
+        className={clsx("flex w-full flex-col bg-base-200 px-2", {
+          "pb-2": !hasAudio,
+        })}
+      >
         <div className="flex w-full flex-row justify-between">
           <div className="fkex flex-1 flex-col">
             <p>
@@ -213,8 +219,8 @@ export const Word: React.FC<{
             {savingAudioForWordId === word.id ? <LoadingIcon /> : <MicIcon />}
           </button>
         </div>
-        {word.recordAudio && word.recordAudio.length > 0 && (
-          <div className="mt-2 flex w-full flex-col gap-2">
+        {hasAudio && (
+          <div className="my-2 flex w-full flex-col gap-2">
             <hr />
             {word.recordAudio.map((audio) => (
               <div key={audio.url} className="flex flex-row">
