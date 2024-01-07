@@ -1,38 +1,86 @@
-import React from "react";
-// import WaveSurfer from "wavesurfer.js";
+import React, { useState, useEffect, useRef } from "react";
 
-export const RecordAnimation: React.FC<{ title: string | null }> = ({
-  title,
-}) => {
-  const waveRef = React.useRef<HTMLDivElement>(null);
+const RecordAnimation: React.FC = () => {
+  const [audioData, setAudioData] = useState(new Uint8Array(0));
+  const animationFrameId = useRef(0);
+  const audioContext = useRef<AudioContext | null>(null);
+  const analyser = useRef<AnalyserNode | null>(null);
+  const dataArr = useRef<Uint8Array | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
-  // // use wavesurfer to draw the wave
-  // React.useEffect(() => {
-  //   if (!waveRef.current) return;
+  useEffect(() => {
+    const tick = () => {
+      if (analyser.current && dataArr.current) {
+        analyser.current.getByteTimeDomainData(dataArr.current);
+        setAudioData(new Uint8Array(dataArr.current));
+        animationFrameId.current = requestAnimationFrame(tick);
+      }
+    };
 
-  //   const wavesurfer = WaveSurfer.create({
-  //     container: waveRef.current,
-  //     waveColor: "violet",
-  //     progressColor: "purple",
-  //     cursorColor: "transparent",
-  //     barWidth: 2,
-  //     barRadius: 3,
-  //     barGap: undefined,
-  //     responsive: true,
-  //     height: 128,
-  //   });
+    const getAudio = async () => {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      audioContext.current = new AudioContext();
+      const source = audioContext.current.createMediaStreamSource(stream);
+      analyser.current = audioContext.current.createAnalyser();
+      dataArr.current = new Uint8Array(analyser.current.frequencyBinCount);
+      source.connect(analyser.current);
+      tick();
+    };
 
-  //   wavesurfer.load("/audio/record.mp3");
+    getAudio().catch((error) => console.error("Error getting audio:", error));
 
-  //   return () => {
-  //     wavesurfer.destroy();
-  //   };
-  // }, []);
+    return () => {
+      cancelAnimationFrame(animationFrameId.current);
+      if (audioContext.current) {
+        audioContext.current
+          .close()
+          .catch((error) =>
+            console.error("Error closing audio context:", error)
+          )
+          .finally(() => {
+            audioContext.current = null;
+            analyser.current = null;
+            dataArr.current = null;
+          });
+      }
+    };
+  }, []);
 
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    // Set the canvas dimensions to match its display size
+    canvas.width = canvas.clientWidth;
+    canvas.height = canvas.clientHeight;
+
+    const height = canvas.height;
+    const width = canvas.width;
+    const context = canvas.getContext("2d");
+    if (!context) return;
+
+    // Clear the canvas before each drawing
+    context.clearRect(0, 0, width, height);
+
+    // Set the stroke style and line width
+    context.strokeStyle = "black";
+    context.lineWidth = 1;
+
+    console.log(audioData);
+    context.beginPath();
+    audioData.forEach((item, index) => {
+      const x = width * (index / audioData.length);
+      const y = (item / 255.0) * height;
+      index === 0 ? context.moveTo(x, y) : context.lineTo(x, y);
+    });
+    context.stroke();
+  }, [audioData]); // Dependency on audioData ensures this runs every time audioData updates
   return (
-    <div className="pointer-events-none fixed top-0 left-0 z-10 flex h-full w-full flex-col items-center bg-red-200">
-      <h4 className="mt-40">{title}</h4>
-      <div ref={waveRef}></div>
-    </div>
+    <canvas
+      className="pointer-events-none fixed top-0 left-0 z-50 h-screen w-screen bg-red-200"
+      ref={canvasRef}
+    />
   );
 };
+
+export default RecordAnimation;

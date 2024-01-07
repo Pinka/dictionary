@@ -3,7 +3,7 @@ import { type RecordAudio, type Record, type Tag } from "@prisma/client";
 import React from "react";
 // import { Tags } from "./Tags";
 import { type LongPressCallback, useLongPress } from "use-long-press";
-import { RecordAnimation } from "./RecordAnimation";
+import RecordAnimation from "./RecordAnimation";
 import { api } from "~/utils/api";
 import { v4 as guid } from "uuid";
 import { DeleteIcon } from "./DeleteIcon";
