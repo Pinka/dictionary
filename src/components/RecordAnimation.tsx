@@ -9,10 +9,16 @@ const RecordAnimation: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   useEffect(() => {
+    let t = 0;
     const tick = () => {
       if (analyser.current && dataArr.current) {
-        analyser.current.getByteTimeDomainData(dataArr.current);
-        setAudioData(new Uint8Array(dataArr.current));
+        // Only update the audio data every 6 frames
+        if (t === 6) {
+          t = 0;
+          analyser.current.getByteTimeDomainData(dataArr.current);
+          setAudioData(new Uint8Array(dataArr.current));
+        }
+        t = t + 1;
         animationFrameId.current = requestAnimationFrame(tick);
       }
     };
@@ -73,6 +79,7 @@ const RecordAnimation: React.FC = () => {
       const y = (item / 255.0) * height;
       index === 0 ? context.moveTo(x, y) : context.lineTo(x, y);
     });
+
     context.stroke();
   }, [audioData]); // Dependency on audioData ensures this runs every time audioData updates
   return (
