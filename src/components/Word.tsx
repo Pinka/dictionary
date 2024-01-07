@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 import { type RecordAudio, type Record, type Tag } from "@prisma/client";
 import React from "react";
-import { Tags } from "./Tags";
+// import { Tags } from "./Tags";
 import { type LongPressCallback, useLongPress } from "use-long-press";
 import { RecordAnimation } from "./RecordAnimation";
 import { api } from "~/utils/api";
@@ -9,7 +9,7 @@ import { v4 as guid } from "uuid";
 import { DeleteIcon } from "./DeleteIcon";
 import LoadingIcon from "./LoadingIcon";
 import { MicIcon } from "./MicIcon";
-import clsx from "clsx";
+import { useSession } from "next-auth/react";
 
 export type FullRecord = Record & { tags: Tag[]; recordAudio: RecordAudio[] };
 
@@ -18,6 +18,8 @@ export const Word: React.FC<{
   onChange: (word: FullRecord) => void;
 }> = ({ word, onChange }) => {
   const apiContext = api.useContext();
+  const { data: sessionData } = useSession();
+  const isUserLoggedIn = !!sessionData;
 
   const [isRecording, setIsRecording] = React.useState(false);
 
@@ -68,7 +70,15 @@ export const Word: React.FC<{
             const audio = blob.size === 0 ? undefined : blob;
 
             if (!audio) {
+              setSavingAudioForWordId(0);
               alert("No audio recorded");
+              return;
+            }
+
+            // error if file larger than 150kb
+            if (audio.size > 150000) {
+              setSavingAudioForWordId(0);
+              alert("Audio too long. Please record a shorter audio");
               return;
             }
 
@@ -195,9 +205,9 @@ export const Word: React.FC<{
   return (
     <>
       <div
-        className={clsx("flex w-full flex-col bg-base-200 px-2", {
-          "pb-2": !hasAudio,
-        })}
+        className={
+          "flex w-full flex-col gap-2 rounded-sm bg-base-200 py-2 px-3"
+        }
       >
         <div className="flex w-full flex-row justify-between">
           <div className="fkex flex-1 flex-col">
@@ -206,39 +216,47 @@ export const Word: React.FC<{
               <br />
               <span className="text-xs">{word.contentEn}</span>
             </p>
-            <Tags className="pt-4" tags={word.tags} />
+            {/* <Tags className="pt-4" tags={word.tags} /> */}
           </div>
           {isRecording && <RecordAnimation title={word.contentMu} />}
           {/* {showPlayButton && <PlayButton isPlaying={isPlaying} onPlay={onPlay} />} */}
-          <button
-            type="button"
-            title={isRecording ? "Recording..." : "Record"}
-            className="mr-3 flex flex-none flex-col justify-center align-middle"
-            {...bindLongPress()}
-          >
-            {savingAudioForWordId === word.id ? <LoadingIcon /> : <MicIcon />}
-          </button>
+          {isUserLoggedIn && (
+            <button
+              type="button"
+              title={
+                isRecording
+                  ? "Recording..."
+                  : "Record the pronounciation of this word"
+              }
+              className="flex flex-none flex-col justify-center align-middle"
+              {...bindLongPress()}
+            >
+              {savingAudioForWordId === word.id ? <LoadingIcon /> : <MicIcon />}
+            </button>
+          )}
         </div>
         {hasAudio && (
-          <div className="my-2 flex w-full flex-col gap-2">
+          <div className="flex w-full flex-col gap-2">
             <hr />
             {word.recordAudio.map((audio) => (
-              <div key={audio.url} className="flex flex-row">
+              <div key={audio.url} className="flex flex-row gap-3">
                 <audio
                   controls
                   src={audio.url}
                   className="h-8 w-full"
                   preload="metadata"
                 />
-                <button
-                  type="button"
-                  title="Delete"
-                  className="mr-3 flex flex-none flex-col justify-center align-middle disabled:text-zinc-400"
-                  onClick={() => onDeleteAudio(audio)}
-                  disabled={word.recordAudio.length === 1}
-                >
-                  <DeleteIcon />
-                </button>
+                {isUserLoggedIn && (
+                  <button
+                    type="button"
+                    title="Delete"
+                    className="flex flex-none flex-col justify-center align-middle disabled:text-zinc-400"
+                    onClick={() => onDeleteAudio(audio)}
+                    disabled={word.recordAudio.length === 1}
+                  >
+                    <DeleteIcon />
+                  </button>
+                )}
               </div>
             ))}
           </div>

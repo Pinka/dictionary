@@ -1,7 +1,7 @@
 import React from "react";
 import { api } from "~/utils/api";
 import { type FullRecord, Word } from "./Word";
-import { Tags } from "./Tags";
+// import { Tags } from "./Tags";
 import LoadingIcon from "./LoadingIcon";
 
 export const Words: React.FC = () => {
@@ -26,11 +26,11 @@ export const Words: React.FC = () => {
       }
     );
 
-  const { data: tagsList } = api.tags.getAll.useQuery();
+  // const { data: tagsList } = api.tags.getAll.useQuery();
 
-  const onTagSelect = (selectedTags: number[]) => {
-    setSelectedTags(selectedTags);
-  };
+  // const onTagSelect = (selectedTags: number[]) => {
+  //   setSelectedTags(selectedTags);
+  // };
 
   const onWordUpdate = (record: FullRecord) => {
     apiContext.words.getAll.setInfiniteData(
@@ -77,17 +77,17 @@ export const Words: React.FC = () => {
       <div className="flex w-full flex-row pt-2">
         <input
           placeholder="Search..."
-          className="input-bordered input w-full placeholder:italic"
+          className="input-bordered input w-full rounded-sm placeholder:italic"
           type="text"
           onChange={(e) => setSearch(e.target.value)}
         />
       </div>
-      <Tags
+      {/* <Tags
         className="px-2"
         tags={tagsList}
         selectedTags={selectedTags}
         onTagSelect={onTagSelect}
-      />
+      /> */}
       {data?.pages
         .flatMap((p) => p)
         .flatMap((word) => (
