@@ -72,7 +72,10 @@ const RecordAnimation: React.FC = () => {
     context.strokeStyle = "black";
     context.lineWidth = 1;
 
-    console.log(audioData);
+    // smooth out the waveform
+    context.lineJoin = "round";
+    context.lineCap = "round";
+
     context.beginPath();
     audioData.forEach((item, index) => {
       const x = width * (index / audioData.length);
