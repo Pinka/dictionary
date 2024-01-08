@@ -176,32 +176,6 @@ export const Word: React.FC<{
       });
   };
 
-  // const onPlay = (e: React.MouseEvent<HTMLButtonElement>) => {
-  //   e.preventDefault();
-
-  //   if (!word.audioMuUrl) {
-  //     return;
-  //   }
-
-  //   console.log("play audio", word.audioMuUrl);
-
-  //   const audio = new Audio(word.audioMuUrl);
-  //   audio
-  //     .play()
-  //     .then(() => {
-  //       console.log("playing");
-  //       setIsPlaying(true);
-  //     })
-  //     .finally(() => {
-  //       console.log("finished playing");
-  //       audio.remove();
-  //       setIsPlaying(false);
-  //     })
-  //     .catch((e) => {
-  //       console.error("Play error", e);
-  //     });
-  // };
-
   return (
     <>
       <div
@@ -218,7 +192,7 @@ export const Word: React.FC<{
             </p>
             {/* <Tags className="pt-4" tags={word.tags} /> */}
           </div>
-          {isRecording && <RecordAnimation title={word.contentMu} />}
+          {isRecording && <RecordAnimation title={word.contentMu ?? ""} />}
           {/* {showPlayButton && <PlayButton isPlaying={isPlaying} onPlay={onPlay} />} */}
           {isUserLoggedIn && (
             <button

@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 
-const RecordAnimation: React.FC = () => {
+const RecordAnimation: React.FC<{
+  title: string;
+}> = ({ title }) => {
   const [audioData, setAudioData] = useState(new Uint8Array(0));
   const animationFrameId = useRef(0);
   const audioContext = useRef<AudioContext | null>(null);
@@ -85,11 +87,15 @@ const RecordAnimation: React.FC = () => {
 
     context.stroke();
   }, [audioData]); // Dependency on audioData ensures this runs every time audioData updates
+
   return (
-    <canvas
-      className="pointer-events-none fixed top-0 left-0 z-50 h-screen w-screen bg-red-200"
-      ref={canvasRef}
-    />
+    <div className="pointer-events-none fixed top-0 left-0 z-10 h-full w-full flex-col items-center bg-red-200">
+      <canvas
+        className="absolute top-0 left-0 h-screen w-screen bg-transparent"
+        ref={canvasRef}
+      />
+      <h4 className="mt-20 w-full text-center text-xl">{title}</h4>
+    </div>
   );
 };
 
