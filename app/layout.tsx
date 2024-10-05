@@ -14,8 +14,9 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Dictionary",
-  description: "Mauritian to English dictionary",
+  title: "Mauritian to English Dictionary",
+  description: "Translate Mauritian Creole to English ans vice versa",
+  robots: "follow, index",
 };
 
 export default function RootLayout({
