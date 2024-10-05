@@ -1,6 +1,6 @@
 "use client";
 import React, { useId, useMemo, useRef, useEffect, useState } from "react";
-import { VariableSizeList as List } from "react-window";
+import { VariableSizeList as List, VariableSizeList } from "react-window";
 import { renderToString } from "react-dom/server"; // Import renderToString
 import { Word } from "./Word";
 import dictionary from "@/app/dictionary.json";
@@ -12,6 +12,7 @@ export const Words: React.FC = () => {
 
   const newId = useId();
   const containerRef = useRef<HTMLDivElement>(null);
+  const listRef = useRef<VariableSizeList>(null);
 
   const filteredWords = useMemo(
     () =>
@@ -56,7 +57,7 @@ export const Words: React.FC = () => {
   };
 
   // Row renderer for the list
-  const Row = React.memo(function Row({
+  function Row({
     index,
     style,
   }: {
@@ -71,18 +72,17 @@ export const Words: React.FC = () => {
         />
       </div>
     );
-  });
-
-  // // Memoize the Row component to prevent unnecessary re-renders
-  // const memoizedRow = React.memo(Row, (prevProps, nextProps) => {
-  //   return prevProps.index === nextProps.index;
-  // }, [filteredWords, newId]);
+  }
 
   // Function to update the height of the list
   const updateListHeight = () => {
     if (containerRef.current) {
       const height = containerRef.current.clientHeight;
       setListHeight(height);
+    }
+
+    if (listRef.current) {
+      listRef.current.resetAfterIndex(0, true); // Invalidate all cached heights
     }
   };
 
@@ -100,7 +100,7 @@ export const Words: React.FC = () => {
   }, []); // Run only once on mount
 
   return (
-    <div className="flex flex-col items-center justify-items-stretch gap-2 break-all h-full px-1">
+    <div className="flex flex-col items-center gap-2 break-all h-full px-1">
       <div className="flex w-full flex-row pt-2">
         <Input
           placeholder="Search..."
@@ -108,9 +108,10 @@ export const Words: React.FC = () => {
           onChange={(e) => setSearch(e.target.value)}
         />
       </div>
-      <div ref={containerRef} className="flex-grow w-full">
+      <div ref={containerRef} className="flex-1 w-full">
         {listHeight > 0 && ( // Only render the list if we have a valid height
           <List
+            ref={listRef}
             height={listHeight} // Use the calculated height
             itemCount={filteredWords.length}
             itemSize={getItemHeight} // Use the function to get the dynamic height

@@ -15,7 +15,7 @@ export default function Home() {
         />
       </div>
       <div className="flex flex-col h-screen">
-        <main className="flex-grow mx-auto w-full max-w-sm pb-2 overflow-y-auto">
+        <main className="flex-grow mx-auto w-full max-w-sm overflow-hidden">
           <Words />
         </main>
       </div>
