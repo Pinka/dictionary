@@ -14,9 +14,11 @@ export default function Home() {
           priority
         />
       </div>
-      <main className="mx-auto max-w-sm pb-2 h-screen">
-        <Words />
-      </main>
+      <div className="flex flex-col h-screen">
+        <main className="flex-grow mx-auto w-full max-w-sm pb-2 overflow-y-auto">
+          <Words />
+        </main>
+      </div>
     </>
   );
 }
