@@ -103,6 +103,7 @@ export const Words: React.FC = () => {
     <div className="flex flex-col items-center gap-2 break-all h-full px-1">
       <div className="flex w-full flex-row pt-2">
         <Input
+          className="bg-neutral-200/90"
           placeholder="Search..."
           type="text"
           onChange={(e) => setSearch(e.target.value)}
