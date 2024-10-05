@@ -100,7 +100,7 @@ export const Words: React.FC = () => {
   }, []); // Run only once on mount
 
   return (
-    <div className="flex flex-col items-center justify-items-stretch gap-2 break-all h-full">
+    <div className="flex flex-col items-center justify-items-stretch gap-2 break-all h-full px-1">
       <div className="flex w-full flex-row pt-2">
         <Input
           placeholder="Search..."
