@@ -3,7 +3,7 @@ import React, { useId, useMemo, useRef, useEffect, useState } from "react";
 import { VariableSizeList as List } from "react-window";
 import { renderToString } from "react-dom/server"; // Import renderToString
 import { Word } from "./Word";
-import dictionary from "@/private/dictionary.json";
+import dictionary from "@/app/dictionary.json";
 import { Input } from "@/components/ui/input";
 
 export const Words: React.FC = () => {
