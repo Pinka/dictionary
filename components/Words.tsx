@@ -106,6 +106,7 @@ export const Words: React.FC = () => {
           className="bg-neutral-200/90"
           placeholder="Search..."
           type="text"
+          maxLength={100}
           defaultValue={currentSearch}
           onChange={handleSearchChange}
         />
