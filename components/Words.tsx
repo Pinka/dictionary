@@ -1,5 +1,5 @@
 "use client";
-import React, { useId, useRef, useEffect, useState } from "react";
+import React, { useId, useRef, useEffect, useState, Suspense } from "react";
 import { VariableSizeList as List, VariableSizeList } from "react-window";
 import { renderToString } from "react-dom/server";
 import { Word } from "./Word";
@@ -10,6 +10,14 @@ import { useSearchParams, useRouter } from "next/navigation"; // Import hooks fo
 let queryTimer: NodeJS.Timeout;
 
 export const Words: React.FC = () => {
+  return (
+    <Suspense>
+      <WordsImpl />
+    </Suspense>
+  );
+};
+
+export const WordsImpl: React.FC = () => {
   const [listHeight, setListHeight] = useState<number>(0);
   const [filteredWords, setFilteredWords] = useState<
     (typeof dictionary)[number][]
@@ -94,7 +102,6 @@ export const Words: React.FC = () => {
       } else {
         newParams.delete("q");
       }
-      console.log(newParams);
       router.push(`?${newParams.toString()}`);
     }, 500);
   };
