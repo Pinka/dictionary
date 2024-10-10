@@ -130,6 +130,7 @@ export const WordsImpl: React.FC = () => {
             {({ index, style }) => (
               <div style={style}>
                 <Word
+                  highlight={currentSearch}
                   word={{
                     id: newId + index,
                     contentEn: filteredWords[index].en,

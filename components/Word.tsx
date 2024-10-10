@@ -1,4 +1,5 @@
 import React from "react";
+import Highlighter from "react-highlight-words";
 
 export type Record = {
   id: string;
@@ -8,8 +9,9 @@ export type Record = {
 
 export const Word: React.FC<{
   word: Record;
+  highlight?: string;
   style?: React.CSSProperties;
-}> = ({ word, style }) => {
+}> = ({ word, highlight, style }) => {
   return (
     <div
       style={style}
@@ -21,10 +23,20 @@ export const Word: React.FC<{
         <div className="fkex flex-1 flex-col">
           <p>
             <span className="text-xs lg:text-base font-bold">
-              {word.contentMu}
+              <Highlighter
+                autoEscape
+                searchWords={highlight?.split(" ") ?? []}
+                textToHighlight={word.contentMu ?? ""}
+              />
             </span>
             <br />
-            <span className="text-xs lg:text-base">{word.contentEn}</span>
+            <span className="text-xs lg:text-base">
+              <Highlighter
+                autoEscape
+                searchWords={highlight?.split(" ") ?? []}
+                textToHighlight={word.contentEn ?? ""}
+              />
+            </span>
           </p>
         </div>
       </div>
