@@ -111,7 +111,7 @@ export const WordsImpl: React.FC = () => {
       <div className="flex w-full flex-row pt-2">
         <Input
           className="bg-neutral-200/90"
-          placeholder="Search..."
+          placeholder={`Search ${dictionary.length} words...`}
           type="text"
           maxLength={100}
           defaultValue={currentSearch}
