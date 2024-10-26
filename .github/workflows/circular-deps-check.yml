@@ -17,12 +17,12 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha }}
-          fetch-depth: 0  # Fetch full history to access all commits
+          fetch-depth: 0 # Fetch full history to access all commits
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: "20"
+          cache: "npm"
 
       - name: Install ESLint and Plugins
         run: |
@@ -39,7 +39,10 @@ jobs:
           }' > .eslintrc.json
 
       - name: Debug PR context
-        run: echo "PR Number: ${{ github.event.pull_request.number }} | Repo: ${{ github.repo }} | Owner: ${{ github.event.repository.owner.login }}"
+        run: |
+          echo "PR Number: ${{ github.event.pull_request.number }}"
+          echo "Repo: ${{ github.event.repository.name }}"
+          echo "Owner: ${{ github.event.repository.owner.login }}"
 
       - name: Check base branch for circular dependencies
         id: base-check
@@ -83,11 +86,11 @@ jobs:
             }
 
             const body = `## 🔄 Circular Dependencies Check
-            
+
             ${changeEmoji} **Impact:** ${changeMessage}
-            
+
             ${prCount > 0 ? `### Current Circular Dependencies (${prCount} total)\n\n\`\`\`\n${cycles}\n\`\`\`` : '### ✅ No Circular Dependencies Found'}
-            
+
             ${baseCount !== prCount ? `### 📊 Changes
             - Base branch: ${baseCount} circular dependencies
             - This PR: ${prCount} circular dependencies` : ''}
@@ -101,7 +104,7 @@ jobs:
 
             // Log for debugging
             console.log(`Creating comment on PR #${issue_number} in ${context.repo.owner}/${context.repo.repo}`);
-            
+
             await github.rest.issues.createComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
