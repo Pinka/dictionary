@@ -46,7 +46,7 @@ jobs:
           echo "Checking circular dependencies on the base branch..."
           npx eslint '**/*.{js,jsx,ts,tsx}' --format json > base-results.json || true
           cat base-results.json  # Output results for debugging
-          echo "base_count=$(jq '[.[][] | .messages[] | select(.ruleId == "import/no-cycle")] | length' base-results.json || echo 0)" >> $GITHUB_OUTPUT
+          echo "base_count=$(jq '[.[] | .messages[] | select(.ruleId == "import/no-cycle")] | length' base-results.json || echo 0)" >> $GITHUB_OUTPUT
 
       - name: Check PR for circular dependencies
         id: pr-check
@@ -55,7 +55,7 @@ jobs:
           echo "Checking circular dependencies on the PR..."
           npx eslint '**/*.{js,jsx,ts,tsx}' --format json > pr-results.json || true
           cat pr-results.json  # Output results for debugging
-          echo "pr_count=$(jq '[.[][] | .messages[] | select(.ruleId == "import/no-cycle")] | length' pr-results.json || echo 0)" >> $GITHUB_OUTPUT
+          echo "pr_count=$(jq '[.[] | .messages[] | select(.ruleId == "import/no-cycle")] | length' pr-results.json || echo 0)" >> $GITHUB_OUTPUT
 
           if [ -s pr-results.json ]; then
             echo "CYCLES<<EOF" >> $GITHUB_ENV
