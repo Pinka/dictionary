@@ -84,7 +84,7 @@ jobs:
             }
 
             const body = `
-            ${changeEmoji} ${changeMessage}
+            ${changeEmoji} **Impact:** ${changeMessage}
             ${baseCount !== prCount ? `
             - Base branch: ${baseCount}
             - This PR: ${prCount}` : ''}
