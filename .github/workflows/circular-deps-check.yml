@@ -31,7 +31,7 @@ jobs:
       - name: Configure ESLint
         run: |
           echo '{
-            "extends": ["eslint:recommended", "plugin:import/errors", "plugin:import/warnings"],
+            "extends": ["next/core-web-vitals", "next/typescript", "plugin:import/errors"],
             "plugins": ["import"],
             "rules": {
               "import/no-cycle": "error"
