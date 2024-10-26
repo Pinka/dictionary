@@ -77,26 +77,21 @@ jobs:
 
             if (difference > 0) {
               changeEmoji = '🔴';
-              changeMessage = `Added ${difference} new circular dependencies`;
+              changeMessage = `Added ${difference} circular dependencies`;
             } else if (difference < 0) {
               changeEmoji = '🟢';
               changeMessage = `Removed ${Math.abs(difference)} circular dependencies`;
             }
 
-            const body = `## 🔄 Circular Dependencies Check
-
-            ${changeEmoji} **Impact:** ${changeMessage}
-
-            ${prCount > 0 ? `### Current Circular Dependencies (${prCount} total)\n\n\`\`\`\n${cycles}\n\`\`\`` : '### ✅ No Circular Dependencies Found'}
+            const body = `
+            ${changeEmoji} ${changeMessage}
 
             ${baseCount !== prCount ? `### 📊 Changes
             - Base branch: ${baseCount} circular dependencies
-            - This PR: ${prCount} circular dependencies` : ''}
+            - This PR: ${prCount} circular dependencies` : ''}`;
 
-            ${prCount > 0 ? '\n### 🔧 Recommendations:\n' +
-            '- Restructure components to avoid circular imports\n' +
-            '- Move shared code to a separate module\n' +
-            '- Consider using dependency injection' : ''}`;
+
+            ${prCount > 0 ? `\n\`\`\`\n${cycles}\n\`\`\`` : ''}
 
             const issue_number = context.issue.number;
 
