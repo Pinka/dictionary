@@ -88,10 +88,10 @@ jobs:
 
             ${baseCount !== prCount ? `### 📊 Changes
             - Base branch: ${baseCount} circular dependencies
-            - This PR: ${prCount} circular dependencies` : ''}`;
-
+            - This PR: ${prCount} circular dependencies` : ''}
 
             ${prCount > 0 ? `\n\`\`\`\n${cycles}\n\`\`\`` : ''}
+            `;
 
             const issue_number = context.issue.number;
 
