@@ -38,26 +38,20 @@ jobs:
             }
           }' > .eslintrc.json
 
-      - name: Debug PR context
-        run: |
-          echo "PR Number: ${{ github.event.pull_request.number }}"
-          echo "Repo: ${{ github.event.repository.name }}"
-          echo "Owner: ${{ github.event.repository.owner.login }}"
-
       - name: Check base branch for circular dependencies
         id: base-check
         run: |
           git fetch origin +refs/pull/${{ github.event.pull_request.number }}/merge
           git checkout ${{ github.event.pull_request.base.sha }}
           npx eslint '**/*.{js,jsx,ts,tsx}' --format json > base-results.json || true
-          echo "base_count=$(jq '. | length' base-results.json || echo 0)" >> $GITHUB_OUTPUT
+          echo "base_count=$(jq '[.[][] | .messages[] | select(.ruleId == "import/no-cycle")] | length' base-results.json || echo 0)" >> $GITHUB_OUTPUT
 
       - name: Check PR for circular dependencies
         id: pr-check
         run: |
           git checkout ${{ github.event.pull_request.head.sha }}
           npx eslint '**/*.{js,jsx,ts,tsx}' --format json > pr-results.json || true
-          echo "pr_count=$(jq '. | length' pr-results.json || echo 0)" >> $GITHUB_OUTPUT
+          echo "pr_count=$(jq '[.[][] | .messages[] | select(.ruleId == "import/no-cycle")] | length' pr-results.json || echo 0)" >> $GITHUB_OUTPUT
 
           if [ -s pr-results.json ]; then
             echo "CYCLES<<EOF" >> $GITHUB_ENV
