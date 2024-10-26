@@ -1,7 +1,5 @@
 import React from "react";
 import Highlighter from "react-highlight-words";
-import page from "@/app/page";
-console.log(page);
 
 export type Record = {
   id: string;
