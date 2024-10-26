@@ -1,0 +1,109 @@
+name: Circular Dependencies Check
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+permissions:
+  pull-requests: write
+  contents: read
+
+jobs:
+  circular-deps-check:
+    name: Check Circular Dependencies
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0 # Fetch full history to access all commits
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install ESLint and Plugins
+        run: |
+          npm install eslint eslint-plugin-import --save-dev
+
+      - name: Configure ESLint
+        run: |
+          echo '{
+            "extends": ["next/core-web-vitals", "next/typescript", "plugin:import/errors"],
+            "plugins": ["import"],
+            "rules": {
+              "import/no-cycle": "error"
+            }
+          }' > .eslintrc.json
+
+      - name: Check base branch for circular dependencies
+        id: base-check
+        run: |
+          git fetch origin +refs/pull/${{ github.event.pull_request.number }}/merge
+          git checkout ${{ github.event.pull_request.base.sha }}
+          echo "Checking circular dependencies on the base branch..."
+          npx eslint '**/*.{js,jsx,ts,tsx}' --format json > base-results.json || true
+          cat base-results.json  # Output results for debugging
+          echo "base_count=$(jq '[.[] | .messages[] | select(.ruleId == "import/no-cycle")] | length' base-results.json || echo 0)" >> $GITHUB_OUTPUT
+
+      - name: Check PR for circular dependencies
+        id: pr-check
+        run: |
+          git checkout ${{ github.event.pull_request.head.sha }}
+          echo "Checking circular dependencies on the PR..."
+          npx eslint '**/*.{js,jsx,ts,tsx}' --format json > pr-results.json || true
+          cat pr-results.json  # Output results for debugging
+          echo "pr_count=$(jq '[.[] | .messages[] | select(.ruleId == "import/no-cycle")] | length' pr-results.json || echo 0)" >> $GITHUB_OUTPUT
+
+          if [ -s pr-results.json ]; then
+            echo "CYCLES<<EOF" >> $GITHUB_ENV
+            jq '[.[] | {filePath, messages: [.messages[] | select(.ruleId == "import/no-cycle") | .message]} | select(.messages | length > 0)]' pr-results.json >> $GITHUB_ENV
+            echo "EOF" >> $GITHUB_ENV
+          fi
+
+      - name: Create PR comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const cycles = process.env.CYCLES || '';
+            const baseCount = parseInt('${{ steps.base-check.outputs.base_count }}') || 0;
+            const prCount = parseInt('${{ steps.pr-check.outputs.pr_count }}') || 0;
+            const difference = prCount - baseCount;
+
+            if(difference === 0) {
+              return;
+            }
+
+            let changeEmoji = '👌';
+            let changeMessage = 'No change in circular dependencies';
+
+            if (difference > 0) {
+              changeEmoji = '🔴';
+              changeMessage = `Added ${difference} circular dependencies`;
+            } else if (difference < 0) {
+              changeEmoji = '🟢';
+              changeMessage = `Removed ${Math.abs(difference)} circular dependencies`;
+            }
+
+            const body = `
+            ${changeEmoji} **Impact:** ${changeMessage}
+            ${baseCount !== prCount ? `
+            - Base branch: ${baseCount}
+            - This PR: ${prCount}` : ''}
+
+            ${prCount > 0 ? `\n\`\`\`\n${cycles}\n\`\`\`` : ''}
+            `;
+
+            const issue_number = context.issue.number;
+
+            // Log for debugging
+            console.log(`Creating comment on PR #${issue_number} in ${context.repo.owner}/${context.repo.repo}`);
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issue_number,
+              body: body
+            });
