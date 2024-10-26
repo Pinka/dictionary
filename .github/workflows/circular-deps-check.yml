@@ -85,8 +85,7 @@ jobs:
 
             const body = `
             ${changeEmoji} ${changeMessage}
-
-            ${baseCount !== prCount ? `### 📊 Changes
+            ${baseCount !== prCount ? `
             - Base branch: ${baseCount} circular dependencies
             - This PR: ${prCount} circular dependencies` : ''}
 
