@@ -72,6 +72,10 @@ jobs:
             const prCount = parseInt('${{ steps.pr-check.outputs.pr_count }}') || 0;
             const difference = prCount - baseCount;
 
+            if(difference === 0) {
+              return;
+            }
+
             let changeEmoji = '👌';
             let changeMessage = 'No change in circular dependencies';
 
