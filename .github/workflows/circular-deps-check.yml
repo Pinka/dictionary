@@ -59,7 +59,7 @@ jobs:
 
           if [ -s pr-results.json ]; then
             echo "CYCLES<<EOF" >> $GITHUB_ENV
-            cat pr-results.json >> $GITHUB_ENV  # Add ESLint results to the environment variable
+            jq '[.[] | {filePath, messages: [.messages[] | select(.ruleId == "import/no-cycle")]} | select(.messages | length > 0)]' pr-results.json >> $GITHUB_ENV
             echo "EOF" >> $GITHUB_ENV
           fi
 
