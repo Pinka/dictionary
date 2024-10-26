@@ -17,32 +17,44 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha }}
-          fetch-depth: 2  # Just enough for PR and its base
+          fetch-depth: 2 # Just enough for PR and its base
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: "20"
+          cache: "npm"
 
-      - run: npm ci
+      - name: Install ESLint and Plugins
+        run: |
+          npm install eslint eslint-plugin-import --save-dev
+
+      - name: Configure ESLint
+        run: |
+          echo '{
+            "extends": ["eslint:recommended", "plugin:import/errors", "plugin:import/warnings"],
+            "plugins": ["import"],
+            "rules": {
+              "import/no-cycle": "error"
+            }
+          }' > .eslintrc.json
 
       - name: Check base branch for circular dependencies
         id: base-check
         run: |
           git checkout ${{ github.event.pull_request.base.sha }}
-          npm run check:circular:json > base-results.json || true
-          echo "base_count=$(jq 'length' base-results.json || echo 0)" >> $GITHUB_OUTPUT
+          npx eslint . --format json > base-results.json || true
+          echo "base_count=$(jq '. | length' base-results.json || echo 0)" >> $GITHUB_OUTPUT
 
       - name: Check PR for circular dependencies
         id: pr-check
         run: |
           git checkout ${{ github.event.pull_request.head.sha }}
-          npm run check:circular:json > pr-results.json || true
-          echo "pr_count=$(jq 'length' pr-results.json || echo 0)" >> $GITHUB_OUTPUT
-          
+          npx eslint . --format json > pr-results.json || true
+          echo "pr_count=$(jq '. | length' pr-results.json || echo 0)" >> $GITHUB_OUTPUT
+
           if [ -s pr-results.json ]; then
             echo "CYCLES<<EOF" >> $GITHUB_ENV
-            npm run check:circular
+            cat pr-results.json >> $GITHUB_ENV  # Add ESLint results to the environment variable
             echo "EOF" >> $GITHUB_ENV
           fi
 
@@ -54,10 +66,10 @@ jobs:
             const baseCount = parseInt('${{ steps.base-check.outputs.base_count }}') || 0;
             const prCount = parseInt('${{ steps.pr-check.outputs.pr_count }}') || 0;
             const difference = prCount - baseCount;
-            
+
             let changeEmoji = '🟡';
             let changeMessage = 'No change in circular dependencies';
-            
+
             if (difference > 0) {
               changeEmoji = '🔴';
               changeMessage = `Added ${difference} new circular dependencies`;
@@ -65,24 +77,24 @@ jobs:
               changeEmoji = '🟢';
               changeMessage = `Removed ${Math.abs(difference)} circular dependencies`;
             }
-            
+
             const body = `## 🔄 Circular Dependencies Check
-            
+
             ${changeEmoji} **Impact:** ${changeMessage}
-            
+
             ${prCount > 0 ? `### Current Circular Dependencies (${prCount} total)\n\n\`\`\`\n${cycles}\n\`\`\`` : '### ✅ No Circular Dependencies Found'}
-            
+
             ${baseCount !== prCount ? `
             ### 📊 Changes
             - Base branch: ${baseCount} circular dependencies
             - This PR: ${prCount} circular dependencies
             ` : ''}
-            
+
             ${prCount > 0 ? '\n### 🔧 Recommendations:\n' +
             '- Restructure components to avoid circular imports\n' +
             '- Move shared code to a separate module\n' +
             '- Consider using dependency injection' : ''}`;
-            
+
             await github.rest.issues.createComment({
               owner: context.repo.owner,
               repo: context.repo.name,
