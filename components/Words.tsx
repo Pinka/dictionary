@@ -6,6 +6,9 @@ import { Word } from "./Word";
 import dictionary from "@/app/dictionary.json";
 import { Input } from "@/components/ui/input";
 import { useSearchParams, useRouter } from "next/navigation"; // Import hooks for search params
+import { submitWord } from "@/app/actions";
+import { SubmitButton } from "@/app/components/SubmitButton";
+import { cn } from "@/lib/utils"; // You'll need this utility for className merging
 
 let queryTimer: NodeJS.Timeout;
 
@@ -28,6 +31,10 @@ export const WordsImpl: React.FC = () => {
   const searchRef = useRef<string>();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const [isFormExpanded, setIsFormExpanded] = useState(false);
+  const formRef = useRef<HTMLFormElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [formError, setFormError] = useState(false);
 
   const currentSearch = searchParams.get("q") ?? "";
   if (currentSearch !== searchRef.current) {
@@ -83,7 +90,7 @@ export const WordsImpl: React.FC = () => {
   useEffect(() => {
     updateListHeight();
 
-    window.addEventListener("resize", updateListHeight);
+    window.addEventListener("resize", updateListHeight, { passive: true });
 
     return () => {
       window.removeEventListener("resize", updateListHeight);
@@ -106,9 +113,30 @@ export const WordsImpl: React.FC = () => {
     }, 500);
   };
 
+  useEffect(() => {
+    if (isFormExpanded && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [isFormExpanded]);
+
+  const handleSubmit = async (formData: FormData) => {
+    try {
+      await submitWord(formData);
+      if (formRef.current) {
+        formRef.current.reset();
+        setIsFormExpanded(false);
+      }
+    } catch (error) {
+      setFormError(true);
+      if (inputRef.current) {
+        inputRef.current.focus();
+      }
+    }
+  };
+
   return (
     <div className="flex flex-col items-center gap-2 break-all h-full px-1">
-      <div className="flex w-full flex-row pt-2">
+      <div className="flex w-full flex-col gap-2 pt-2">
         <Input
           className="bg-neutral-200/90"
           placeholder={`Search ${dictionary.length} words...`}
@@ -117,7 +145,59 @@ export const WordsImpl: React.FC = () => {
           defaultValue={currentSearch}
           onChange={handleSearchChange}
         />
+
+        <div className="w-full">
+          <div className="rounded-sm bg-neutral-200/90 p-1">
+            <button
+              type="button"
+              onClick={() => setIsFormExpanded(!isFormExpanded)}
+              className="flex w-full items-center gap-2 text-sm font-medium text-black hover:text-neutral-700 transition-colors px-2"
+              aria-expanded={isFormExpanded.toString()}
+              aria-controls="suggestion-form"
+            >
+              <span className="text-lg" aria-hidden="true">
+                {isFormExpanded ? "−" : "+"}
+              </span>
+              Suggest a word
+            </button>
+
+            <form
+              ref={formRef}
+              id="suggestion-form"
+              action={handleSubmit}
+              className={cn(
+                "grid grid-rows-[0fr] overflow-hidden transition-all duration-300 ease-out",
+                isFormExpanded && "grid-rows-[1fr]"
+              )}
+              aria-hidden={(!isFormExpanded).toString()}
+            >
+              <div className="min-h-0">
+                <div
+                  className={cn(
+                    "flex flex-col gap-2 p-1 opacity-0 transition-opacity duration-200",
+                    isFormExpanded && "opacity-100"
+                  )}
+                >
+                  <Input
+                    ref={inputRef}
+                    type="text"
+                    name="word"
+                    id="word"
+                    required
+                    autoComplete="off"
+                    className={cn("bg-white/90", formError && "border-red-500")}
+                    placeholder="Enter your word suggestion"
+                    aria-label="Word suggestion"
+                    onChange={() => setFormError(false)}
+                  />
+                  <SubmitButton />
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
       </div>
+
       <div ref={containerRef} className="flex-1 w-full">
         {listHeight > 0 && (
           <List
