@@ -28,7 +28,12 @@ jobs:
       - name: Check base branch for circular dependencies
         id: base-check
         run: |
+          # Reset any changes and switch to base branch
+          git reset --hard
+          git clean -fdx
           git checkout ${{ github.event.pull_request.base.sha }}
+
+          # Install dependencies and run check
           npm ci
           npm install eslint eslint-plugin-import --save-dev
           echo '{
@@ -40,13 +45,17 @@ jobs:
           }' > .eslintrc.json
           npx eslint '**/*.{js,jsx,ts,tsx}' --format json > base-results.json || true
           echo "base_count=$(jq '[.[] | .messages[] | select(.ruleId == "import/no-cycle")] | length' base-results.json || echo 0)" >> $GITHUB_OUTPUT
-          git clean -fdx  # Clean up all untracked files
 
       # Then check PR branch
       - name: Check PR for circular dependencies
         id: pr-check
         run: |
+          # Reset any changes and switch to PR branch
+          git reset --hard
+          git clean -fdx
           git checkout ${{ github.event.pull_request.head.sha }}
+
+          # Install dependencies and run check
           npm ci
           npm install eslint eslint-plugin-import --save-dev
           echo '{
