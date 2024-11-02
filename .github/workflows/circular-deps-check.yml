@@ -24,12 +24,18 @@ jobs:
           node-version: "20"
           cache: "npm"
 
-      - name: Install ESLint and Plugins
+      # Check base branch first, before any npm installs
+      - name: Check base branch for circular dependencies
+        id: base-check
         run: |
-          npm install eslint eslint-plugin-import --save-dev
+          # Reset any changes and switch to base branch
+          git reset --hard
+          git clean -fdx
+          git checkout ${{ github.event.pull_request.base.sha }}
 
-      - name: Configure ESLint
-        run: |
+          # Install dependencies and run check
+          npm ci
+          npm install eslint eslint-plugin-import --save-dev
           echo '{
             "extends": ["next/core-web-vitals", "next/typescript", "plugin:import/errors"],
             "plugins": ["import"],
@@ -37,24 +43,29 @@ jobs:
               "import/no-cycle": "error"
             }
           }' > .eslintrc.json
-
-      - name: Check base branch for circular dependencies
-        id: base-check
-        run: |
-          git fetch origin +refs/pull/${{ github.event.pull_request.number }}/merge
-          git checkout ${{ github.event.pull_request.base.sha }}
-          echo "Checking circular dependencies on the base branch..."
           npx eslint '**/*.{js,jsx,ts,tsx}' --format json > base-results.json || true
-          cat base-results.json  # Output results for debugging
           echo "base_count=$(jq '[.[] | .messages[] | select(.ruleId == "import/no-cycle")] | length' base-results.json || echo 0)" >> $GITHUB_OUTPUT
 
+      # Then check PR branch
       - name: Check PR for circular dependencies
         id: pr-check
         run: |
+          # Reset any changes and switch to PR branch
+          git reset --hard
+          git clean -fdx
           git checkout ${{ github.event.pull_request.head.sha }}
-          echo "Checking circular dependencies on the PR..."
+
+          # Install dependencies and run check
+          npm ci
+          npm install eslint eslint-plugin-import --save-dev
+          echo '{
+            "extends": ["next/core-web-vitals", "next/typescript", "plugin:import/errors"],
+            "plugins": ["import"],
+            "rules": {
+              "import/no-cycle": "error"
+            }
+          }' > .eslintrc.json
           npx eslint '**/*.{js,jsx,ts,tsx}' --format json > pr-results.json || true
-          cat pr-results.json  # Output results for debugging
           echo "pr_count=$(jq '[.[] | .messages[] | select(.ruleId == "import/no-cycle")] | length' pr-results.json || echo 0)" >> $GITHUB_OUTPUT
 
           if [ -s pr-results.json ]; then
@@ -97,9 +108,6 @@ jobs:
             `;
 
             const issue_number = context.issue.number;
-
-            // Log for debugging
-            console.log(`Creating comment on PR #${issue_number} in ${context.repo.owner}/${context.repo.repo}`);
 
             await github.rest.issues.createComment({
               owner: context.repo.owner,
