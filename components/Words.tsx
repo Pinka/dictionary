@@ -9,6 +9,7 @@ import { useSearchParams, useRouter } from "next/navigation"; // Import hooks fo
 import { submitWord } from "@/app/actions";
 import { SubmitButton } from "@/app/components/SubmitButton";
 import { cn } from "@/lib/utils"; // You'll need this utility for className merging
+import { Toast } from "@/components/ui/toast";
 
 let queryTimer: NodeJS.Timeout;
 
@@ -35,6 +36,10 @@ export const WordsImpl: React.FC = () => {
   const formRef = useRef<HTMLFormElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const [formError, setFormError] = useState(false);
+  const [toast, setToast] = useState<{
+    message: string;
+    type: "success" | "error";
+  } | null>(null);
 
   const currentSearch = searchParams.get("q") ?? "";
   if (currentSearch !== searchRef.current) {
@@ -121,13 +126,32 @@ export const WordsImpl: React.FC = () => {
 
   const handleSubmit = async (formData: FormData) => {
     try {
-      await submitWord(formData);
-      if (formRef.current) {
-        formRef.current.reset();
-        setIsFormExpanded(false);
+      const result = await submitWord(formData);
+      if (result.success) {
+        if (formRef.current) {
+          formRef.current.reset();
+          setIsFormExpanded(false);
+        }
+        setToast({
+          message: "Thank you! Your word suggestion has been submitted.",
+          type: "success",
+        });
+      } else {
+        setFormError(true);
+        setToast({
+          message: result.error || "Failed to submit word",
+          type: "error",
+        });
+        if (inputRef.current) {
+          inputRef.current.focus();
+        }
       }
     } catch (error) {
       setFormError(true);
+      setToast({
+        message: "An error occurred while submitting your suggestion",
+        type: "error",
+      });
       if (inputRef.current) {
         inputRef.current.focus();
       }
@@ -135,93 +159,106 @@ export const WordsImpl: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col items-center gap-2 break-all h-full px-1">
-      <div className="flex w-full flex-col gap-2 pt-2">
-        <Input
-          className="bg-neutral-200/90"
-          placeholder={`Search ${dictionary.length} words...`}
-          type="text"
-          maxLength={100}
-          defaultValue={currentSearch}
-          onChange={handleSearchChange}
-        />
+    <>
+      <div className="flex flex-col items-center gap-2 break-all h-full px-1">
+        <div className="flex w-full flex-col gap-2 pt-2">
+          <Input
+            className="bg-neutral-200/90"
+            placeholder={`Search ${dictionary.length} words...`}
+            type="text"
+            maxLength={100}
+            defaultValue={currentSearch}
+            onChange={handleSearchChange}
+          />
 
-        <div className="w-full">
-          <div className="rounded-sm bg-neutral-200/90 p-1">
-            <button
-              type="button"
-              onClick={() => setIsFormExpanded(!isFormExpanded)}
-              className="flex w-full items-center gap-2 text-sm font-medium text-black hover:text-neutral-700 transition-colors px-2"
-              aria-expanded={isFormExpanded.toString()}
-              aria-controls="suggestion-form"
-            >
-              <span className="text-lg" aria-hidden="true">
-                {isFormExpanded ? "−" : "+"}
-              </span>
-              Suggest a word
-            </button>
+          <div className="w-full">
+            <div className="rounded-sm bg-neutral-200/90 p-1">
+              <button
+                type="button"
+                onClick={() => setIsFormExpanded(!isFormExpanded)}
+                className="flex w-full items-center gap-2 text-sm font-medium text-black hover:text-neutral-700 transition-colors px-2"
+                aria-expanded={isFormExpanded.toString()}
+                aria-controls="suggestion-form"
+              >
+                <span className="text-lg" aria-hidden="true">
+                  {isFormExpanded ? "−" : "+"}
+                </span>
+                Suggest a word
+              </button>
 
-            <form
-              ref={formRef}
-              id="suggestion-form"
-              action={handleSubmit}
-              className={cn(
-                "grid grid-rows-[0fr] overflow-hidden transition-all duration-300 ease-out",
-                isFormExpanded && "grid-rows-[1fr]"
-              )}
-              aria-hidden={(!isFormExpanded).toString()}
-            >
-              <div className="min-h-0">
-                <div
-                  className={cn(
-                    "flex flex-col gap-2 p-1 opacity-0 transition-opacity duration-200",
-                    isFormExpanded && "opacity-100"
-                  )}
-                >
-                  <Input
-                    ref={inputRef}
-                    type="text"
-                    name="word"
-                    id="word"
-                    required
-                    autoComplete="off"
-                    className={cn("bg-white/90", formError && "border-red-500")}
-                    placeholder="Enter your word suggestion"
-                    aria-label="Word suggestion"
-                    onChange={() => setFormError(false)}
-                  />
-                  <SubmitButton />
+              <form
+                ref={formRef}
+                id="suggestion-form"
+                action={handleSubmit}
+                className={cn(
+                  "grid grid-rows-[0fr] overflow-hidden transition-all duration-300 ease-out",
+                  isFormExpanded && "grid-rows-[1fr]"
+                )}
+                aria-hidden={(!isFormExpanded).toString()}
+              >
+                <div className="min-h-0">
+                  <div
+                    className={cn(
+                      "flex flex-col gap-2 p-1 opacity-0 transition-opacity duration-200",
+                      isFormExpanded && "opacity-100"
+                    )}
+                  >
+                    <Input
+                      ref={inputRef}
+                      type="text"
+                      name="word"
+                      id="word"
+                      required
+                      autoComplete="off"
+                      className={cn(
+                        "bg-white/90",
+                        formError && "border-red-500"
+                      )}
+                      placeholder="Enter your word suggestion"
+                      aria-label="Word suggestion"
+                      onChange={() => setFormError(false)}
+                    />
+                    <SubmitButton />
+                  </div>
                 </div>
-              </div>
-            </form>
+              </form>
+            </div>
           </div>
+        </div>
+
+        <div ref={containerRef} className="flex-1 w-full">
+          {listHeight > 0 && (
+            <List
+              ref={listRef}
+              height={listHeight}
+              itemCount={filteredWords.length}
+              itemSize={getItemHeight}
+              width="100%"
+            >
+              {({ index, style }) => (
+                <div style={style}>
+                  <Word
+                    highlight={currentSearch}
+                    word={{
+                      id: newId + index,
+                      contentEn: filteredWords[index].en,
+                      contentMu: filteredWords[index].mu,
+                    }}
+                  />
+                </div>
+              )}
+            </List>
+          )}
         </div>
       </div>
 
-      <div ref={containerRef} className="flex-1 w-full">
-        {listHeight > 0 && (
-          <List
-            ref={listRef}
-            height={listHeight}
-            itemCount={filteredWords.length}
-            itemSize={getItemHeight}
-            width="100%"
-          >
-            {({ index, style }) => (
-              <div style={style}>
-                <Word
-                  highlight={currentSearch}
-                  word={{
-                    id: newId + index,
-                    contentEn: filteredWords[index].en,
-                    contentMu: filteredWords[index].mu,
-                  }}
-                />
-              </div>
-            )}
-          </List>
-        )}
-      </div>
-    </div>
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
+    </>
   );
 };
