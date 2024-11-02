@@ -146,7 +146,7 @@ export const WordsImpl: React.FC = () => {
           inputRef.current.focus();
         }
       }
-    } catch (error) {
+    } catch {
       setFormError(true);
       setToast({
         message: "An error occurred while submitting your suggestion",
@@ -177,7 +177,7 @@ export const WordsImpl: React.FC = () => {
                 type="button"
                 onClick={() => setIsFormExpanded(!isFormExpanded)}
                 className="flex w-full items-center gap-2 text-sm font-medium text-black hover:text-neutral-700 transition-colors px-2"
-                aria-expanded={isFormExpanded.toString()}
+                aria-expanded={isFormExpanded}
                 aria-controls="suggestion-form"
               >
                 <span className="text-lg" aria-hidden="true">
@@ -194,7 +194,7 @@ export const WordsImpl: React.FC = () => {
                   "grid grid-rows-[0fr] overflow-hidden transition-all duration-300 ease-out",
                   isFormExpanded && "grid-rows-[1fr]"
                 )}
-                aria-hidden={(!isFormExpanded).toString()}
+                aria-hidden={!isFormExpanded}
               >
                 <div className="min-h-0">
                   <div
