@@ -126,7 +126,10 @@ export const WordsImpl: React.FC = () => {
 
   const handleSubmit = async (formData: FormData) => {
     try {
-      const result = await submitWord(formData);
+      const result = await submitWord({
+        mauritian: formData.get("mauritian") as string,
+        english: formData.get("english") as string,
+      });
       if (result.success) {
         if (formRef.current) {
           formRef.current.reset();
@@ -199,23 +202,37 @@ export const WordsImpl: React.FC = () => {
                 <div className="min-h-0">
                   <div
                     className={cn(
-                      "flex flex-col gap-2 p-1 opacity-0 transition-opacity duration-200",
+                      "flex flex-col gap-3 p-1 opacity-0 transition-opacity duration-200",
                       isFormExpanded && "opacity-100"
                     )}
                   >
                     <Input
                       ref={inputRef}
                       type="text"
-                      name="word"
-                      id="word"
+                      name="mauritian"
+                      id="mauritian"
                       required
                       autoComplete="off"
                       className={cn(
                         "bg-white/90",
                         formError && "border-red-500"
                       )}
-                      placeholder="Enter your word suggestion"
-                      aria-label="Word suggestion"
+                      placeholder="Enter word in Mauritian Creole"
+                      aria-label="Mauritian Creole word"
+                      onChange={() => setFormError(false)}
+                    />
+                    <Input
+                      type="text"
+                      name="english"
+                      id="english"
+                      required
+                      autoComplete="off"
+                      className={cn(
+                        "bg-white/90",
+                        formError && "border-red-500"
+                      )}
+                      placeholder="Enter English translation"
+                      aria-label="English translation"
                       onChange={() => setFormError(false)}
                     />
                     <SubmitButton />
