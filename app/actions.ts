@@ -5,10 +5,17 @@ import { headers } from "next/headers";
 import { sanitizeInput } from "@/lib/sanitize";
 import { checkRateLimit } from "@/lib/rate-limit";
 
-export async function submitWord(formData: FormData) {
-  const word = formData.get("word");
-  if (!word || typeof word !== "string") {
-    return { success: false, error: "Word is required" };
+interface WordSubmission {
+  mauritian: string;
+  english: string;
+}
+
+export async function submitWord({ mauritian, english }: WordSubmission) {
+  if (!mauritian || !english) {
+    return {
+      success: false,
+      error: "Both Mauritian and English words are required",
+    };
   }
 
   try {
@@ -25,19 +32,21 @@ export async function submitWord(formData: FormData) {
       };
     }
 
-    // Sanitize input
-    const sanitizedWord = sanitizeInput(word);
+    // Sanitize inputs
+    const sanitizedMauritian = sanitizeInput(mauritian);
+    const sanitizedEnglish = sanitizeInput(english);
 
-    // Validate sanitized input
-    if (sanitizedWord.length < 1) {
+    // Validate sanitized inputs
+    if (sanitizedMauritian.length < 1 || sanitizedEnglish.length < 1) {
       return { success: false, error: "Invalid word format" };
     }
 
     await createGitHubIssue(
-      `Word Suggestion: ${sanitizedWord}`,
+      `Word Suggestion: ${sanitizedMauritian}`,
       `New word suggestion received:
       
-Word: ${sanitizedWord}
+Mauritian Creole: ${sanitizedMauritian}
+English: ${sanitizedEnglish}
 Date: ${new Date().toISOString()}
 User Agent: ${headers().get("user-agent")}
       
