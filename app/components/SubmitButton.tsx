@@ -21,7 +21,7 @@ export function SubmitButton({ className }: SubmitButtonProps) {
         className
       )}
     >
-      {pending ? "Submitting..." : "Submit Suggestion"}
+      {pending ? "Submitting..." : "Submit"}
     </button>
   );
 }

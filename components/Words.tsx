@@ -142,7 +142,7 @@ export const WordsImpl: React.FC = () => {
       } else {
         setFormError(true);
         setToast({
-          message: result.error || "Failed to submit word",
+          message: result.error || "Failed to submit suggestion",
           type: "error",
         });
         if (inputRef.current) {
@@ -167,7 +167,9 @@ export const WordsImpl: React.FC = () => {
         <div className="flex w-full flex-col gap-2 pt-2">
           <Input
             className="bg-neutral-200/90"
-            placeholder={`Search ${dictionary.length} words...`}
+            placeholder={`Search more than${Math.floor(
+              dictionary.length / 1000
+            )} thousand words...`}
             type="text"
             maxLength={100}
             defaultValue={currentSearch}
