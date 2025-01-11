@@ -137,7 +137,7 @@ export const WordsImpl: React.FC = () => {
 
         <div
           ref={containerRef}
-          className="h-[calc(100vh-100px)] relative"
+          className="h-[calc(100vh-122px)] relative"
           style={{
             width: "100vw",
             marginLeft: "calc(-50vw + 50%)",

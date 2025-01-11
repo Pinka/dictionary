@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { SubmitButton } from "@/components/ui/SubmitButton";
 import { cn } from "@/lib/utils";
 import { submitWord } from "@/app/actions";
-import { PlusCircle, MinusCircle, MessageCircle } from "lucide-react";
+import { PlusCircle, MinusCircle } from "lucide-react";
 
 interface SuggestionFormProps {
   onSuccess: (message: string) => void;
@@ -66,22 +66,37 @@ export const SuggestionForm: React.FC<SuggestionFormProps> = ({
         className={cn(
           "flex w-full items-center gap-4 px-3 py-2.5",
           "text-sm text-neutral-900",
-          "transition-all duration-200 ease-out",
+          "transition-colors duration-200 ease-out",
           "hover:bg-white/50",
-          "group"
+          "group relative"
         )}
-        aria-expanded={isFormExpanded ? "true" : "false"}
+        aria-expanded={isFormExpanded}
         aria-controls="suggestion-form"
       >
         <div
           className="flex items-center text-neutral-500 group-hover:text-neutral-800 transition-colors"
           aria-hidden="true"
         >
-          {isFormExpanded ? (
-            <MinusCircle className="h-[18px] w-[18px]" />
-          ) : (
-            <PlusCircle className="h-[18px] w-[18px]" />
-          )}
+          <div className="relative w-[18px] h-[18px]">
+            <MinusCircle
+              className={cn(
+                "h-[18px] w-[18px] absolute top-0 left-0",
+                "transition-all duration-200",
+                isFormExpanded
+                  ? "opacity-100 transform-none"
+                  : "opacity-0 -rotate-90 scale-75"
+              )}
+            />
+            <PlusCircle
+              className={cn(
+                "h-[18px] w-[18px] absolute top-0 left-0",
+                "transition-all duration-200",
+                !isFormExpanded
+                  ? "opacity-100 transform-none"
+                  : "opacity-0 rotate-90 scale-75"
+              )}
+            />
+          </div>
         </div>
         <div className="flex flex-col items-start gap-0.5">
           <span className="font-medium tracking-tight">
@@ -93,89 +108,91 @@ export const SuggestionForm: React.FC<SuggestionFormProps> = ({
         </div>
       </button>
 
-      <form
-        ref={formRef}
-        id="suggestion-form"
-        action={handleSubmit}
+      <div
         className={cn(
-          "grid grid-rows-[0fr] transition-all duration-200 ease-out bg-neutral-200/30",
-          isFormExpanded && "grid-rows-[1fr]"
+          "overflow-hidden transition-all duration-200 ease-out",
+          isFormExpanded ? "max-h-[400px]" : "max-h-0"
         )}
-        aria-hidden={isFormExpanded ? "false" : "true"}
       >
-        <div className="min-h-0">
-          <div
-            className={cn(
-              "flex flex-col gap-3 p-3 opacity-0 transition-opacity duration-200",
-              isFormExpanded && "opacity-100"
-            )}
-          >
-            <div className="space-y-1.5">
-              <label
-                htmlFor="mauritian"
-                className="block text-sm font-medium text-neutral-900"
-              >
-                Mauritian Creole Word
-                <span className="text-red-600 ml-0.5" aria-hidden="true">
-                  *
-                </span>
-                <span className="sr-only">(required)</span>
-              </label>
-              <Input
-                ref={inputRef}
-                type="text"
-                name="mauritian"
-                id="mauritian"
-                required
-                autoComplete="off"
-                className={cn(
-                  "bg-white/90",
-                  "focus:ring-1 focus:ring-neutral-400 focus:border-neutral-400",
-                  "text-neutral-900 placeholder:text-neutral-500",
-                  formError && "border-red-500"
-                )}
-                placeholder="e.g., lakaz"
-                onChange={() => setFormError(false)}
-              />
-            </div>
+        <form
+          ref={formRef}
+          id="suggestion-form"
+          action={handleSubmit}
+          className="bg-neutral-200/30"
+          aria-hidden={!isFormExpanded}
+        >
+          <div className="p-3">
+            <div className="flex flex-col gap-3">
+              <div className="space-y-1.5">
+                <label
+                  htmlFor="mauritian"
+                  className="block text-sm font-medium text-neutral-900"
+                >
+                  Mauritian Creole Word
+                  <span className="text-red-600 ml-0.5" aria-hidden="true">
+                    *
+                  </span>
+                  <span className="sr-only">(required)</span>
+                </label>
+                <Input
+                  ref={inputRef}
+                  type="text"
+                  name="mauritian"
+                  id="mauritian"
+                  required
+                  autoComplete="off"
+                  className={cn(
+                    "bg-white/90",
+                    "focus:ring-1 focus:ring-neutral-400 focus:border-neutral-400",
+                    "text-neutral-900 placeholder:text-neutral-500",
+                    formError && "border-red-500"
+                  )}
+                  placeholder="e.g., lakaz"
+                  onChange={() => setFormError(false)}
+                />
+              </div>
 
-            <div className="space-y-1.5">
-              <label
-                htmlFor="english"
-                className="block text-sm font-medium text-neutral-900"
-              >
-                English Translation
-                <span className="text-red-600 ml-0.5" aria-hidden="true">
-                  *
-                </span>
-                <span className="sr-only">(required)</span>
-              </label>
-              <Input
-                type="text"
-                name="english"
-                id="english"
-                required
-                autoComplete="off"
-                className={cn(
-                  "bg-white/90",
-                  "focus:ring-1 focus:ring-neutral-400 focus:border-neutral-400",
-                  "text-neutral-900 placeholder:text-neutral-500",
-                  formError && "border-red-500"
-                )}
-                placeholder="e.g., house"
-                onChange={() => setFormError(false)}
-              />
-            </div>
+              <div className="space-y-1.5">
+                <label
+                  htmlFor="english"
+                  className="block text-sm font-medium text-neutral-900"
+                >
+                  English Translation
+                  <span className="text-red-600 ml-0.5" aria-hidden="true">
+                    *
+                  </span>
+                  <span className="sr-only">(required)</span>
+                </label>
+                <Input
+                  type="text"
+                  name="english"
+                  id="english"
+                  required
+                  autoComplete="off"
+                  className={cn(
+                    "bg-white/90",
+                    "focus:ring-1 focus:ring-neutral-400 focus:border-neutral-400",
+                    "text-neutral-900 placeholder:text-neutral-500",
+                    formError && "border-red-500"
+                  )}
+                  placeholder="e.g., house"
+                  onChange={() => setFormError(false)}
+                />
+              </div>
 
-            <div className="flex flex-col gap-2">
-              <SubmitButton />
-              <p className="text-xs text-neutral-700 text-center" role="status">
-                Your contribution helps preserve and share Mauritian culture
-              </p>
+              <div className="flex flex-col gap-2">
+                <SubmitButton />
+                <p
+                  className="text-xs text-neutral-700 text-center"
+                  role="status"
+                >
+                  Your contribution helps preserve and share Mauritian culture
+                </p>
+              </div>
             </div>
           </div>
-        </div>
-      </form>
+        </form>
+      </div>
     </div>
   );
 };
