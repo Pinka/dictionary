@@ -163,21 +163,21 @@ export const WordsImpl: React.FC = () => {
 
   return (
     <>
-      <div className="flex flex-col items-center gap-2 break-all h-full px-1">
-        <div className="flex w-full flex-col gap-2 pt-2">
+      <div className="absolute inset-x-0">
+        <header className="sticky top-0 z-10 backdrop-blur-[1px] p-2">
           <Input
-            className="bg-neutral-200/90"
-            placeholder={`Search more than${Math.floor(
-              dictionary.length / 1000
-            )} thousand words...`}
+            className="bg-neutral-200/60"
+            placeholder={`Search ${(dictionary.length / 1000).toFixed(
+              1
+            )}K+ Mauritian Creole words...`}
             type="text"
             maxLength={100}
             defaultValue={currentSearch}
             onChange={handleSearchChange}
           />
 
-          <div className="w-full">
-            <div className="rounded-sm bg-neutral-200/90 p-1">
+          <div className="w-full mt-2">
+            <div className="rounded-sm bg-neutral-200/60 p-1">
               <button
                 type="button"
                 onClick={() => setIsFormExpanded(!isFormExpanded)}
@@ -243,9 +243,16 @@ export const WordsImpl: React.FC = () => {
               </form>
             </div>
           </div>
-        </div>
+        </header>
 
-        <div ref={containerRef} className="flex-1 w-full">
+        <div
+          ref={containerRef}
+          className="h-[calc(100vh-100px)] relative"
+          style={{
+            width: "100vw",
+            marginLeft: "calc(-50vw + 50%)",
+          }}
+        >
           {listHeight > 0 && (
             <List
               ref={listRef}
@@ -253,24 +260,38 @@ export const WordsImpl: React.FC = () => {
               itemCount={filteredWords.length}
               itemSize={getItemHeight}
               width="100%"
+              style={{
+                overflowX: "hidden",
+                paddingLeft: "calc(50vw - 50%)",
+                paddingRight: "calc(50vw - 50%)",
+                marginBottom: "-2px",
+              }}
             >
               {({ index, style }) => (
-                <div style={style}>
-                  <Word
-                    highlight={currentSearch}
-                    word={{
-                      id: newId + index,
-                      contentEn: filteredWords[index].en,
-                      contentMu: filteredWords[index].mu,
-                    }}
-                  />
+                <div
+                  style={{
+                    ...style,
+                    display: "flex",
+                    justifyContent: "center",
+                    paddingBottom: 0,
+                  }}
+                >
+                  <div className="w-full max-w-sm px-2">
+                    <Word
+                      highlight={currentSearch}
+                      word={{
+                        id: newId + index,
+                        contentEn: filteredWords[index].en,
+                        contentMu: filteredWords[index].mu,
+                      }}
+                    />
+                  </div>
                 </div>
               )}
             </List>
           )}
         </div>
       </div>
-
       {toast && (
         <Toast
           message={toast.message}

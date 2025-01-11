@@ -14,11 +14,11 @@ export default function Home() {
           priority
         />
       </div>
-      <div className="flex flex-col h-screen">
-        <main className="flex-grow mx-auto w-full max-w-sm overflow-hidden">
+      <main className="h-screen overflow-y-auto overflow-x-hidden">
+        <div className="max-w-sm mx-auto relative">
           <Words />
-        </main>
-      </div>
+        </div>
+      </main>
     </>
   );
 }
