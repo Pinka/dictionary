@@ -5,11 +5,9 @@ import { renderToString } from "react-dom/server";
 import { Word } from "./Word";
 import dictionary from "@/app/dictionary.json";
 import { Input } from "@/components/ui/input";
-import { useSearchParams, useRouter } from "next/navigation"; // Import hooks for search params
-import { submitWord } from "@/app/actions";
-import { SubmitButton } from "@/app/components/SubmitButton";
-import { cn } from "@/lib/utils"; // You'll need this utility for className merging
+import { useSearchParams, useRouter } from "next/navigation";
 import { Toast } from "@/components/ui/toast";
+import { SuggestionForm } from "./SuggestionForm";
 
 let queryTimer: NodeJS.Timeout;
 
@@ -32,10 +30,6 @@ export const WordsImpl: React.FC = () => {
   const searchRef = useRef<string>();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [isFormExpanded, setIsFormExpanded] = useState(false);
-  const formRef = useRef<HTMLFormElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
-  const [formError, setFormError] = useState(false);
   const [toast, setToast] = useState<{
     message: string;
     type: "success" | "error";
@@ -118,49 +112,6 @@ export const WordsImpl: React.FC = () => {
     }, 500);
   };
 
-  useEffect(() => {
-    if (isFormExpanded && inputRef.current) {
-      inputRef.current.focus();
-    }
-  }, [isFormExpanded]);
-
-  const handleSubmit = async (formData: FormData) => {
-    try {
-      const result = await submitWord({
-        mauritian: formData.get("mauritian") as string,
-        english: formData.get("english") as string,
-      });
-      if (result.success) {
-        if (formRef.current) {
-          formRef.current.reset();
-          setIsFormExpanded(false);
-        }
-        setToast({
-          message: "Thank you! Your word suggestion has been submitted.",
-          type: "success",
-        });
-      } else {
-        setFormError(true);
-        setToast({
-          message: result.error || "Failed to submit suggestion",
-          type: "error",
-        });
-        if (inputRef.current) {
-          inputRef.current.focus();
-        }
-      }
-    } catch {
-      setFormError(true);
-      setToast({
-        message: "An error occurred while submitting your suggestion",
-        type: "error",
-      });
-      if (inputRef.current) {
-        inputRef.current.focus();
-      }
-    }
-  };
-
   return (
     <>
       <div className="absolute inset-x-0">
@@ -177,71 +128,10 @@ export const WordsImpl: React.FC = () => {
           />
 
           <div className="w-full mt-2">
-            <div className="rounded-sm bg-neutral-200/60 p-1">
-              <button
-                type="button"
-                onClick={() => setIsFormExpanded(!isFormExpanded)}
-                className="flex w-full items-center gap-2 text-sm font-medium text-black hover:text-neutral-700 transition-colors px-2"
-                aria-expanded={isFormExpanded}
-                aria-controls="suggestion-form"
-              >
-                <span className="text-lg" aria-hidden="true">
-                  {isFormExpanded ? "−" : "+"}
-                </span>
-                Suggest a word
-              </button>
-
-              <form
-                ref={formRef}
-                id="suggestion-form"
-                action={handleSubmit}
-                className={cn(
-                  "grid grid-rows-[0fr] overflow-hidden transition-all duration-300 ease-out",
-                  isFormExpanded && "grid-rows-[1fr]"
-                )}
-                aria-hidden={!isFormExpanded}
-              >
-                <div className="min-h-0">
-                  <div
-                    className={cn(
-                      "flex flex-col gap-3 p-1 opacity-0 transition-opacity duration-200",
-                      isFormExpanded && "opacity-100"
-                    )}
-                  >
-                    <Input
-                      ref={inputRef}
-                      type="text"
-                      name="mauritian"
-                      id="mauritian"
-                      required
-                      autoComplete="off"
-                      className={cn(
-                        "bg-white/90",
-                        formError && "border-red-500"
-                      )}
-                      placeholder="Enter word in Mauritian Creole"
-                      aria-label="Mauritian Creole word"
-                      onChange={() => setFormError(false)}
-                    />
-                    <Input
-                      type="text"
-                      name="english"
-                      id="english"
-                      required
-                      autoComplete="off"
-                      className={cn(
-                        "bg-white/90",
-                        formError && "border-red-500"
-                      )}
-                      placeholder="Enter English translation"
-                      aria-label="English translation"
-                      onChange={() => setFormError(false)}
-                    />
-                    <SubmitButton />
-                  </div>
-                </div>
-              </form>
-            </div>
+            <SuggestionForm
+              onSuccess={(message) => setToast({ message, type: "success" })}
+              onError={(message) => setToast({ message, type: "error" })}
+            />
           </div>
         </header>
 
