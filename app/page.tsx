@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { LanguageSwitch } from "@/components/LanguageSwitch";
 import Image from "next/image";
 import backgroundPic from "./background.webp";
-import { SearchSuggestions } from "@/features/search/components/SearchSuggestions";
+import { SearchSuggestions } from "@/components/search/SearchSuggestions";
 
 export default function Home() {
   return (
