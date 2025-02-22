@@ -37,7 +37,7 @@ const nextConfig = {
               "style-src 'self' 'unsafe-inline' eu.posthog.com",
               "img-src 'self' blob: data: https:",
               "font-src 'self' data:",
-              "connect-src 'self' eu.i.posthog.com",
+              "connect-src 'self' eu.i.posthog.com eu.posthog.com internal-t.posthog.com",
               "form-action 'self'",
               "frame-ancestors 'none'",
               "base-uri 'self'",
