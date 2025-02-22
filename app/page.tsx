@@ -35,9 +35,11 @@ export default function Home() {
                 <Input
                   type="text"
                   placeholder="Search for a word..."
-                  className="w-full pl-4 pr-12 py-6 text-lg rounded-full"
+                  className="w-full pl-4 pr-14 py-6 text-lg rounded-full"
                 />
-                <VoiceSearch />
+                <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                  <VoiceSearch />
+                </div>
               </div>
 
               {/* Language Selector */}
