@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
-import { Analytics } from "@vercel/analytics/react";
 import dictionary from "@/app/dictionary.json";
 import { CSPostHogProvider } from "./providers";
 
@@ -49,7 +48,6 @@ export default function RootLayout({
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         >
           {children}
-          <Analytics />
         </body>
       </CSPostHogProvider>
     </html>
