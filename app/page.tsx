@@ -1,6 +1,7 @@
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { VoiceSearch } from "@/components/VoiceSearch";
+import { LanguageSwitch } from "@/components/LanguageSwitch";
 import Image from "next/image";
 import backgroundPic from "./background.webp";
 
@@ -43,19 +44,13 @@ export default function Home() {
               </div>
 
               {/* Language Selector */}
-              <div className="flex justify-center gap-2 items-center">
-                <select className="rounded-md border p-2">
-                  <option value="en">English</option>
-                </select>
-                <span>→</span>
-                <select className="rounded-md border p-2">
-                  <option value="mu">Mauritian</option>
-                </select>
+              <div className="flex justify-center gap-4 items-center">
+                <LanguageSwitch />
               </div>
             </div>
 
             {/* Recent Searches - Only shown when logged in */}
-            <div className="bg-gray-50 p-6 rounded-lg">
+            <div className="bg-gray-100 p-6 rounded-lg">
               <h2 className="text-xl font-semibold mb-4">Recent Searches</h2>
               <ul className="space-y-2">
                 <li className="hover:bg-gray-100 p-2 rounded">
@@ -68,7 +63,7 @@ export default function Home() {
             </div>
 
             {/* Word of the Day */}
-            <div className="bg-gray-50 p-6 rounded-lg">
+            <div className="bg-gray-100 p-6 rounded-lg">
               <h2 className="text-xl font-semibold mb-4">Word of the Day</h2>
               <div>
                 <p className="font-bold">Inspiration</p>
