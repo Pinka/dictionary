@@ -66,7 +66,7 @@ export function Suggestions({
                         )}
                       </div>
                       {suggestion.type === "similar" && (
-                        <span className="text-xs text-muted-foreground">
+                        <span className="text-xs text-muted-foreground text-nowrap">
                           Similar word
                         </span>
                       )}
