@@ -20,7 +20,7 @@ export async function submitWord({ mauritian, english }: WordSubmission) {
 
   try {
     // Get client IP for rate limiting
-    const identifier = headers().get("x-forwarded-for") || "anonymous";
+    const identifier = (await headers()).get("x-forwarded-for") || "anonymous";
 
     // Check rate limit
     const rateLimitResult = await checkRateLimit(identifier);
@@ -48,7 +48,7 @@ export async function submitWord({ mauritian, english }: WordSubmission) {
 Mauritian Creole: ${sanitizedMauritian}
 English: ${sanitizedEnglish}
 Date: ${new Date().toISOString()}
-User Agent: ${headers().get("user-agent")}
+User Agent: ${(await headers()).get("user-agent")}
       
 Please review this suggestion and add it to the dictionary if appropriate.`
     );

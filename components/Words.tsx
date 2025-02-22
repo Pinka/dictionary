@@ -27,7 +27,7 @@ export const WordsImpl: React.FC = () => {
   const newId = useId();
   const containerRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<VariableSizeList>(null);
-  const searchRef = useRef<string>();
+  const searchRef = useRef<string>(undefined);
   const router = useRouter();
   const searchParams = useSearchParams();
   const [toast, setToast] = useState<{
