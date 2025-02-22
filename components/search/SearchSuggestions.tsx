@@ -16,6 +16,7 @@ export const SearchSuggestions = () => {
     const fetchSuggestions = async () => {
       if (debouncedQuery.length < 2) {
         setSuggestions([]);
+        setIsLoading(false);
         return;
       }
 
@@ -28,6 +29,7 @@ export const SearchSuggestions = () => {
         setSuggestions(data);
       } catch (error) {
         console.error("Failed to fetch suggestions:", error);
+        setSuggestions([]);
       } finally {
         setIsLoading(false);
       }
@@ -48,12 +50,13 @@ export const SearchSuggestions = () => {
       <div className="absolute right-3 top-1/2 -translate-y-1/2">
         <VoiceSearch />
       </div>
-      {query.length > 2 && (
+      {query.length > 1 && (
         <Suggestions
           isLoading={isLoading}
           suggestions={suggestions}
           onSelect={(suggestion) => {
             setQuery(suggestion.word);
+            setSuggestions([]);
           }}
         />
       )}

@@ -42,23 +42,20 @@ export function Suggestions({
           align="start"
           sideOffset={4}
         >
-          <Command>
-            <CommandList className="max-h-[300px] py-2">
-              <CommandEmpty className="py-6 text-sm text-muted-foreground">
-                No results found.
-              </CommandEmpty>
-              <CommandGroup>
-                {isLoading ? (
-                  <div className="flex justify-center py-6">
-                    <Loader2 className="h-6 w-6 animate-spin" />
-                  </div>
-                ) : (
-                  suggestions.map((suggestion) => (
+          {isLoading ? (
+            <div className="flex justify-center py-6">
+              <Loader2 className="h-6 w-6 animate-spin" />
+            </div>
+          ) : (
+            <Command>
+              <CommandList className="max-h-[300px] py-2">
+                <CommandEmpty>No results found.</CommandEmpty>
+                <CommandGroup>
+                  {suggestions.map((suggestion) => (
                     <CommandItem
                       key={suggestion.word}
                       value={suggestion.word}
                       onSelect={() => onSelect(suggestion)}
-                      className="px-4 py-2 mx-2 rounded-lg aria-selected:bg-accent/50"
                     >
                       <div className="flex w-full justify-between items-center gap-2">
                         <span className="font-medium">{suggestion.word}</span>
@@ -74,11 +71,11 @@ export function Suggestions({
                         </span>
                       )}
                     </CommandItem>
-                  ))
-                )}
-              </CommandGroup>
-            </CommandList>
-          </Command>
+                  ))}
+                </CommandGroup>
+              </CommandList>
+            </Command>
+          )}
         </PopoverContent>
       </Popover>
     </div>

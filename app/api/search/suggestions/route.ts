@@ -1,3 +1,4 @@
+import { searchDictionary } from "@/lib/search";
 import { NextResponse } from "next/server";
 
 export async function GET(request: Request) {
@@ -11,13 +12,6 @@ export async function GET(request: Request) {
     );
   }
 
-  // Implement your suggestion logic here
-  // This is a placeholder implementation
-  const suggestions = [
-    { word: query, type: "direct", translation: "Translation here" },
-    { word: `${query} (similar)`, type: "similar" },
-    // Add more suggestions based on your logic
-  ];
-
+  const suggestions = searchDictionary(query);
   return NextResponse.json(suggestions);
 }
