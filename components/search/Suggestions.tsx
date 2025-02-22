@@ -37,8 +37,12 @@ export function Suggestions({
         <PopoverTrigger asChild>
           <div className="absolute inset-0" />
         </PopoverTrigger>
-        <PopoverContent className="w-full p-0" align="start" sideOffset={4}>
-          <Command className="rounded-xl border shadow-md bg-white/90 backdrop-blur-sm">
+        <PopoverContent
+          className="bg-white w-full p-0"
+          align="start"
+          sideOffset={4}
+        >
+          <Command>
             <CommandList className="max-h-[300px] py-2">
               <CommandEmpty className="py-6 text-sm text-muted-foreground">
                 No results found.

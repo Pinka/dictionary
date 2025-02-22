@@ -36,23 +36,17 @@ export const SearchSuggestions = () => {
     fetchSuggestions();
   }, [debouncedQuery]);
 
-  // if (suggestions.length === 0) {
-  //   return null;
-  // }
-
   return (
-    <>
-      <div className="relative">
-        <Input
-          type="text"
-          placeholder="Search for a word..."
-          className="w-full pl-4 pr-12 py-6 text-lg rounded-full"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-        />
-        <div className="absolute right-3 top-1/2 -translate-y-1/2">
-          <VoiceSearch />
-        </div>
+    <div className="relative">
+      <Input
+        type="text"
+        placeholder="Search for a word..."
+        className="w-full pl-4 pr-12 py-6 text-lg rounded-full"
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+      />
+      <div className="absolute right-3 top-1/2 -translate-y-1/2">
+        <VoiceSearch />
       </div>
       {query.length > 2 && (
         <Suggestions
@@ -60,10 +54,9 @@ export const SearchSuggestions = () => {
           suggestions={suggestions}
           onSelect={(suggestion) => {
             setQuery(suggestion.word);
-            // Handle search submission
           }}
         />
       )}
-    </>
+    </div>
   );
 };
