@@ -3,8 +3,6 @@ import { LanguageSwitch } from "@/components/LanguageSwitch";
 import Image from "next/image";
 import backgroundPic from "./background.webp";
 import { SearchSuggestions } from "@/features/search/components/SearchSuggestions";
-import { VoiceSearch } from "@/components/VoiceSearch";
-import { Input } from "@/components/ui/input";
 
 export default function Home() {
   return (
