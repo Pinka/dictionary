@@ -1,9 +1,10 @@
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { VoiceSearch } from "@/components/VoiceSearch";
 import { LanguageSwitch } from "@/components/LanguageSwitch";
 import Image from "next/image";
 import backgroundPic from "./background.webp";
+import { SearchSuggestions } from "@/features/search/components/SearchSuggestions";
+import { VoiceSearch } from "@/components/VoiceSearch";
+import { Input } from "@/components/ui/input";
 
 export default function Home() {
   return (
@@ -31,18 +32,7 @@ export default function Home() {
           <div className="max-w-2xl mx-auto space-y-8">
             {/* Search Section */}
             <div className="space-y-6">
-              {/* Search Bar */}
-              <div className="relative">
-                <Input
-                  type="text"
-                  placeholder="Search for a word..."
-                  className="w-full pl-4 pr-14 py-6 text-lg rounded-full"
-                />
-                <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                  <VoiceSearch />
-                </div>
-              </div>
-
+              <SearchSuggestions />
               {/* Language Selector */}
               <div className="flex justify-center gap-4 items-center">
                 <LanguageSwitch />
