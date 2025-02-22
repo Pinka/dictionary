@@ -46,6 +46,7 @@ export const SearchSuggestions = () => {
         className="w-full pl-4 pr-12 py-6 text-lg rounded-full"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
+        autoFocus
       />
       <div className="absolute right-3 top-1/2 -translate-y-1/2">
         <VoiceSearch />
