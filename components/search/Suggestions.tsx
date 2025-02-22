@@ -32,13 +32,13 @@ export function Suggestions({
   onSelect,
 }: SuggestionsProps) {
   return (
-    <div className="relative w-full">
+    <div className="w-full">
       <Popover open={true}>
         <PopoverTrigger asChild>
-          <div className="absolute inset-0" />
+          <div className="h-0" />
         </PopoverTrigger>
         <PopoverContent
-          className="bg-white w-full p-0"
+          className="rounded-xl p-0 w-[var(--radix-popover-trigger-width)] max-w-none bg-white"
           align="start"
           sideOffset={4}
         >
