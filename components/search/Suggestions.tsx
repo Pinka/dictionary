@@ -50,28 +50,52 @@ export function Suggestions({
             <Command>
               <CommandList className="max-h-[300px] py-2">
                 <CommandEmpty>No results found.</CommandEmpty>
-                <CommandGroup>
-                  {suggestions.map((suggestion) => (
-                    <CommandItem
-                      key={suggestion.word}
-                      value={suggestion.word}
-                      onSelect={() => onSelect(suggestion)}
-                    >
-                      <div className="flex w-full justify-between items-center gap-2">
-                        <span className="font-medium">{suggestion.word}</span>
-                        {suggestion.translation && (
-                          <span className="text-sm text-muted-foreground">
-                            {suggestion.translation}
-                          </span>
-                        )}
-                      </div>
-                      {suggestion.type === "similar" && (
-                        <span className="text-xs text-muted-foreground text-nowrap">
-                          Similar word
-                        </span>
-                      )}
-                    </CommandItem>
-                  ))}
+                <CommandGroup heading="Direct Matches" className="pb-2">
+                  {suggestions.map(
+                    (suggestion) =>
+                      suggestion.type === "direct" && (
+                        <CommandItem
+                          key={suggestion.word}
+                          value={suggestion.word}
+                          onSelect={() => onSelect(suggestion)}
+                        >
+                          <div className="flex w-full justify-between items-center gap-2">
+                            <span className="font-medium">
+                              {suggestion.word}
+                            </span>
+                            {suggestion.translation && (
+                              <span className="text-sm text-muted-foreground">
+                                {suggestion.translation}
+                              </span>
+                            )}
+                          </div>
+                        </CommandItem>
+                      )
+                  )}
+                </CommandGroup>
+                <div className="h-px bg-border mx-2" />
+                <CommandGroup heading="Similar Words">
+                  {suggestions.map(
+                    (suggestion) =>
+                      suggestion.type === "similar" && (
+                        <CommandItem
+                          key={suggestion.word}
+                          value={suggestion.word}
+                          onSelect={() => onSelect(suggestion)}
+                        >
+                          <div className="flex w-full justify-between items-center gap-2">
+                            <span className="font-medium">
+                              {suggestion.word}
+                            </span>
+                            {suggestion.translation && (
+                              <span className="text-sm text-muted-foreground">
+                                {suggestion.translation}
+                              </span>
+                            )}
+                          </div>
+                        </CommandItem>
+                      )
+                  )}
                 </CommandGroup>
               </CommandList>
             </Command>
