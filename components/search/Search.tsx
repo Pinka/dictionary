@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { X } from "lucide-react";
 import { Button } from "../ui/button";
 import { useRouter, useSearchParams } from "next/navigation";
+import { saveSearch } from "@/app/actions/search";
 
 let queryTimer: NodeJS.Timeout | undefined = undefined;
 
@@ -20,10 +21,11 @@ export const Search = () => {
 
     clearTimeout(queryTimer);
 
-    queryTimer = setTimeout(() => {
+    queryTimer = setTimeout(async () => {
       const newParams = new URLSearchParams(window.location.search);
       if (search) {
         newParams.set("q", search);
+        saveSearch(search);
       } else {
         newParams.delete("q");
       }

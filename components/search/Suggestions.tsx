@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/popover";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { saveSearch } from "@/app/actions/search";
 
 interface Suggestion {
   word: string;
@@ -44,8 +45,8 @@ export function Suggestions() {
     (suggestion) => suggestion.type === "direct"
   );
 
-  const onSelect = (suggestion: Suggestion) => {
-    console.log(suggestion);
+  const onSelect = async (suggestion: Suggestion) => {
+    await saveSearch(suggestion.word);
   };
 
   const showLine = directSuggestions.length > 0;
