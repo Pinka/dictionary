@@ -12,7 +12,8 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Loader2 } from "lucide-react";
+import { useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 
 interface Suggestion {
   word: string;
@@ -20,23 +21,34 @@ interface Suggestion {
   translation?: string;
 }
 
-interface SuggestionsProps {
-  isLoading: boolean;
-  suggestions: Suggestion[];
-  onSelect: (suggestion: Suggestion) => void;
-}
+export function Suggestions() {
+  const searchParams = useSearchParams();
+  const query = searchParams.get("q") ?? "";
 
-export function Suggestions({
-  isLoading,
-  suggestions,
-  onSelect,
-}: SuggestionsProps) {
+  const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
+
+  useEffect(() => {
+    const fetchSuggestions = async () => {
+      const response = await fetch(`/api/search/suggestions?q=${query}`);
+      const data = await response.json();
+      setSuggestions(data);
+    };
+
+    fetchSuggestions();
+  }, [query]);
+
   const similarSuggestions = suggestions.filter(
     (suggestion) => suggestion.type === "similar"
   );
   const directSuggestions = suggestions.filter(
     (suggestion) => suggestion.type === "direct"
   );
+
+  const onSelect = (suggestion: Suggestion) => {
+    console.log(suggestion);
+  };
+
+  const showLine = directSuggestions.length > 0;
 
   return (
     <div className="w-full">
@@ -45,69 +57,59 @@ export function Suggestions({
           <div className="h-0" />
         </PopoverTrigger>
         <PopoverContent
-          className="rounded-xl p-0 w-[var(--radix-popover-trigger-width)] max-w-none bg-white"
+          className="rounded-2xl p-0 w-[var(--radix-popover-trigger-width)] max-w-none"
           align="start"
           sideOffset={8}
           onOpenAutoFocus={(e) => {
             e.preventDefault();
           }}
         >
-          {isLoading ? (
-            <div className="flex justify-center py-6">
-              <Loader2 className="h-6 w-6 animate-spin" />
-            </div>
-          ) : (
-            <Command>
-              <CommandList className="max-h-dvh py-2">
-                <CommandEmpty>No results found.</CommandEmpty>
-                {directSuggestions.length > 0 && (
-                  <CommandGroup heading="Direct Matches" className="pb-2">
-                    {directSuggestions.map((suggestion) => (
-                      <CommandItem
-                        key={`${suggestion.word}-${suggestion.translation}`}
-                        value={suggestion.word}
-                        onSelect={() => onSelect(suggestion)}
-                      >
-                        <div className="flex w-full justify-between items-center gap-2">
-                          <span className="font-medium">{suggestion.word}</span>
-                          {suggestion.translation && (
-                            <span className="text-sm text-muted-foreground">
-                              {suggestion.translation}
-                            </span>
-                          )}
-                        </div>
-                      </CommandItem>
-                    ))}
-                  </CommandGroup>
-                )}
-                {similarSuggestions.length > 0 && (
-                  <>
-                    <div className="h-px bg-border mx-2" />
-                    <CommandGroup heading="Similar Words">
-                      {similarSuggestions.map((suggestion) => (
-                        <CommandItem
-                          key={`${suggestion.word}-${suggestion.translation}`}
-                          value={suggestion.word}
-                          onSelect={() => onSelect(suggestion)}
-                        >
-                          <div className="flex w-full justify-between items-center gap-2">
-                            <span className="font-medium">
-                              {suggestion.word}
-                            </span>
-                            {suggestion.translation && (
-                              <span className="text-sm text-muted-foreground">
-                                {suggestion.translation}
-                              </span>
-                            )}
-                          </div>
-                        </CommandItem>
-                      ))}
-                    </CommandGroup>
-                  </>
-                )}
-              </CommandList>
-            </Command>
-          )}
+          <Command className="rounded-2xl">
+            <CommandList className="max-h-dvh py-2">
+              <CommandEmpty>No results found.</CommandEmpty>
+              {directSuggestions.length > 0 && (
+                <CommandGroup heading="Direct Matches" className="pb-2">
+                  {directSuggestions.map((suggestion) => (
+                    <CommandItem
+                      key={`${suggestion.word}-${suggestion.translation}`}
+                      value={`${suggestion.word}-${suggestion.translation}`}
+                      onSelect={() => onSelect(suggestion)}
+                    >
+                      <div className="flex w-full justify-between items-center gap-2">
+                        <span className="font-medium">{suggestion.word}</span>
+                        {suggestion.translation && (
+                          <span className="text-sm text-muted-foreground">
+                            {suggestion.translation}
+                          </span>
+                        )}
+                      </div>
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              )}
+              {showLine && <div className="h-px bg-border mx-2" />}
+              {similarSuggestions.length > 0 && (
+                <CommandGroup heading="Similar Words">
+                  {similarSuggestions.map((suggestion) => (
+                    <CommandItem
+                      key={`${suggestion.word}-${suggestion.translation}`}
+                      value={`${suggestion.word}-${suggestion.translation}`}
+                      onSelect={() => onSelect(suggestion)}
+                    >
+                      <div className="flex w-full justify-between items-center gap-2">
+                        <span className="font-medium">{suggestion.word}</span>
+                        {suggestion.translation && (
+                          <span className="text-sm text-muted-foreground">
+                            {suggestion.translation}
+                          </span>
+                        )}
+                      </div>
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              )}
+            </CommandList>
+          </Command>
         </PopoverContent>
       </Popover>
     </div>

@@ -1,46 +1,35 @@
 "use client";
 
-import { useDebounce } from "@/hooks/useDebounce";
-import { useEffect, useState } from "react";
 import { Suggestions } from "./Suggestions";
 import { VoiceSearch } from "@/components/VoiceSearch";
 import { Input } from "@/components/ui/input";
-import { addRecentSearch } from "@/lib/recent-searches";
 import { X } from "lucide-react";
 import { Button } from "../ui/button";
+import { useRouter, useSearchParams } from "next/navigation";
+
+let queryTimer: NodeJS.Timeout | undefined = undefined;
 
 export const Search = () => {
-  const [query, setQuery] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [suggestions, setSuggestions] = useState([]);
-  const debouncedQuery = useDebounce(query, 300);
+  const router = useRouter();
+  const searchParams = useSearchParams();
 
-  useEffect(() => {
-    const fetchSuggestions = async () => {
-      if (debouncedQuery.length < 2) {
-        setSuggestions([]);
-        setIsLoading(false);
-        return;
+  const query = searchParams.get("q") ?? "";
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const search = e.target.value;
+
+    clearTimeout(queryTimer);
+
+    queryTimer = setTimeout(() => {
+      const newParams = new URLSearchParams(window.location.search);
+      if (search) {
+        newParams.set("q", search);
+      } else {
+        newParams.delete("q");
       }
-
-      setIsLoading(true);
-      try {
-        const response = await fetch(
-          `/api/search/suggestions?q=${debouncedQuery}`
-        );
-        const data = await response.json();
-        setSuggestions(data);
-        addRecentSearch(debouncedQuery);
-      } catch (error) {
-        console.error("Failed to fetch suggestions:", error);
-        setSuggestions([]);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchSuggestions();
-  }, [debouncedQuery]);
+      router.push(`?${newParams.toString()}`);
+    }, 500);
+  };
 
   return (
     <div className="relative">
@@ -48,8 +37,8 @@ export const Search = () => {
         type="text"
         placeholder="Search for a word..."
         className="w-full pl-4 pr-24 py-6 text-lg rounded-full"
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
+        defaultValue={query}
+        onChange={handleSearchChange}
         autoFocus
       />
       <div className="absolute right-3 top-1/2 -translate-y-1/2">
@@ -58,7 +47,11 @@ export const Search = () => {
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => setQuery("")}
+              onClick={() => {
+                const newParams = new URLSearchParams(window.location.search);
+                newParams.delete("q");
+                router.push(`?${newParams.toString()}`);
+              }}
               className="h-8 w-8 rounded-full hover:bg-gray-100"
               aria-label="Clear search"
             >
@@ -68,15 +61,7 @@ export const Search = () => {
           <VoiceSearch />
         </div>
       </div>
-      {query.length > 1 && (
-        <Suggestions
-          isLoading={isLoading}
-          suggestions={suggestions}
-          onSelect={(suggestion) => {
-            console.log(suggestion);
-          }}
-        />
-      )}
+      {query.length > 1 && <Suggestions />}
     </div>
   );
 };
