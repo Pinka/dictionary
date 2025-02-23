@@ -5,8 +5,9 @@ import { useEffect, useState } from "react";
 import { Suggestions } from "./Suggestions";
 import { VoiceSearch } from "@/components/VoiceSearch";
 import { Input } from "@/components/ui/input";
+import { addRecentSearch } from "@/lib/recent-searches";
 
-export const SearchSuggestions = () => {
+export const Search = () => {
   const [query, setQuery] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [suggestions, setSuggestions] = useState([]);
@@ -27,6 +28,7 @@ export const SearchSuggestions = () => {
         );
         const data = await response.json();
         setSuggestions(data);
+        addRecentSearch(debouncedQuery, data[0].translation);
       } catch (error) {
         console.error("Failed to fetch suggestions:", error);
         setSuggestions([]);
