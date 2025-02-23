@@ -28,7 +28,7 @@ export const Search = () => {
         );
         const data = await response.json();
         setSuggestions(data);
-        addRecentSearch(debouncedQuery, data[0].translation);
+        addRecentSearch(debouncedQuery);
       } catch (error) {
         console.error("Failed to fetch suggestions:", error);
         setSuggestions([]);

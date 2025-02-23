@@ -4,7 +4,7 @@ import { getRecentSearches, RecentSearch } from "@/lib/recent-searches";
 import { useEffect, useState } from "react";
 
 interface RecentSearchesProps {
-  onSelect?: (word: string, translation: string) => void;
+  onSelect?: (word: string) => void;
 }
 
 export function RecentSearches({ onSelect }: RecentSearchesProps) {
@@ -24,13 +24,10 @@ export function RecentSearches({ onSelect }: RecentSearchesProps) {
           <li
             key={`${search.word}-${search.timestamp}`}
             className="hover:bg-gray-200 p-2 rounded cursor-pointer"
-            onClick={() => onSelect?.(search.word, search.translation)}
+            onClick={() => onSelect?.(search.word)}
           >
             <div className="flex w-full justify-between items-center gap-2">
               <span className="font-medium">{search.word}</span>
-              <span className="text-sm text-muted-foreground">
-                {search.translation}
-              </span>
             </div>
           </li>
         ))}

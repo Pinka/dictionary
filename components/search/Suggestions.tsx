@@ -48,6 +48,9 @@ export function Suggestions({
           className="rounded-xl p-0 w-[var(--radix-popover-trigger-width)] max-w-none bg-white"
           align="start"
           sideOffset={8}
+          onOpenAutoFocus={(e) => {
+            e.preventDefault();
+          }}
         >
           {isLoading ? (
             <div className="flex justify-center py-6">

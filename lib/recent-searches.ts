@@ -3,7 +3,6 @@ const MAX_RECENT_SEARCHES = 5;
 
 export interface RecentSearch {
   word: string;
-  translation: string;
   timestamp: number;
 }
 
@@ -20,17 +19,17 @@ export function getRecentSearches(): RecentSearch[] {
   }
 }
 
-export function addRecentSearch(word: string, translation: string) {
+export function addRecentSearch(word: string) {
   const searches = getRecentSearches();
 
   // Remove if already exists
   const filtered = searches.filter((s) => s.word !== word);
 
   // Add to start of array
-  const newSearches = [
-    { word, translation, timestamp: Date.now() },
-    ...filtered,
-  ].slice(0, MAX_RECENT_SEARCHES);
+  const newSearches = [{ word, timestamp: Date.now() }, ...filtered].slice(
+    0,
+    MAX_RECENT_SEARCHES
+  );
 
   localStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(newSearches));
   return newSearches;
