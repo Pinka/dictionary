@@ -6,6 +6,7 @@ import { Suggestions } from "./Suggestions";
 import { VoiceSearch } from "@/components/VoiceSearch";
 import { Input } from "@/components/ui/input";
 import { addRecentSearch } from "@/lib/recent-searches";
+import { X } from "lucide-react";
 
 export const Search = () => {
   const [query, setQuery] = useState("");
@@ -45,13 +46,24 @@ export const Search = () => {
       <Input
         type="text"
         placeholder="Search for a word..."
-        className="w-full pl-4 pr-12 py-6 text-lg rounded-full"
+        className="w-full pl-4 pr-24 py-6 text-lg rounded-full"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         autoFocus
       />
       <div className="absolute right-3 top-1/2 -translate-y-1/2">
-        <VoiceSearch />
+        <div className="relative">
+          {query && (
+            <button
+              onClick={() => setQuery("")}
+              className="absolute right-[44px] p-2 hover:bg-gray-100 rounded-full"
+              aria-label="Clear search"
+            >
+              <X className="h-4 w-4 " />
+            </button>
+          )}
+          <VoiceSearch />
+        </div>
       </div>
       {query.length > 1 && (
         <Suggestions
@@ -59,8 +71,6 @@ export const Search = () => {
           suggestions={suggestions}
           onSelect={(suggestion) => {
             console.log(suggestion);
-            // setQuery(suggestion.word);
-            // setSuggestions([]);
           }}
         />
       )}
