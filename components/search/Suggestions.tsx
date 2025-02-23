@@ -31,6 +31,13 @@ export function Suggestions({
   suggestions,
   onSelect,
 }: SuggestionsProps) {
+  const similarSuggestions = suggestions.filter(
+    (suggestion) => suggestion.type === "similar"
+  );
+  const directSuggestions = suggestions.filter(
+    (suggestion) => suggestion.type === "direct"
+  );
+
   return (
     <div className="w-full">
       <Popover open={true}>
@@ -40,7 +47,7 @@ export function Suggestions({
         <PopoverContent
           className="rounded-xl p-0 w-[var(--radix-popover-trigger-width)] max-w-none bg-white"
           align="start"
-          sideOffset={4}
+          sideOffset={8}
         >
           {isLoading ? (
             <div className="flex justify-center py-6">
@@ -48,12 +55,33 @@ export function Suggestions({
             </div>
           ) : (
             <Command>
-              <CommandList className="max-h-[300px] py-2">
+              <CommandList className="max-h-dvh py-2">
                 <CommandEmpty>No results found.</CommandEmpty>
-                <CommandGroup heading="Direct Matches" className="pb-2">
-                  {suggestions.map(
-                    (suggestion) =>
-                      suggestion.type === "direct" && (
+                {directSuggestions.length > 0 && (
+                  <CommandGroup heading="Direct Matches" className="pb-2">
+                    {directSuggestions.map((suggestion) => (
+                      <CommandItem
+                        key={suggestion.word}
+                        value={suggestion.word}
+                        onSelect={() => onSelect(suggestion)}
+                      >
+                        <div className="flex w-full justify-between items-center gap-2">
+                          <span className="font-medium">{suggestion.word}</span>
+                          {suggestion.translation && (
+                            <span className="text-sm text-muted-foreground">
+                              {suggestion.translation}
+                            </span>
+                          )}
+                        </div>
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                )}
+                {similarSuggestions.length > 0 && (
+                  <>
+                    <div className="h-px bg-border mx-2" />
+                    <CommandGroup heading="Similar Words">
+                      {similarSuggestions.map((suggestion) => (
                         <CommandItem
                           key={suggestion.word}
                           value={suggestion.word}
@@ -70,33 +98,10 @@ export function Suggestions({
                             )}
                           </div>
                         </CommandItem>
-                      )
-                  )}
-                </CommandGroup>
-                <div className="h-px bg-border mx-2" />
-                <CommandGroup heading="Similar Words">
-                  {suggestions.map(
-                    (suggestion) =>
-                      suggestion.type === "similar" && (
-                        <CommandItem
-                          key={suggestion.word}
-                          value={suggestion.word}
-                          onSelect={() => onSelect(suggestion)}
-                        >
-                          <div className="flex w-full justify-between items-center gap-2">
-                            <span className="font-medium">
-                              {suggestion.word}
-                            </span>
-                            {suggestion.translation && (
-                              <span className="text-sm text-muted-foreground">
-                                {suggestion.translation}
-                              </span>
-                            )}
-                          </div>
-                        </CommandItem>
-                      )
-                  )}
-                </CommandGroup>
+                      ))}
+                    </CommandGroup>
+                  </>
+                )}
               </CommandList>
             </Command>
           )}

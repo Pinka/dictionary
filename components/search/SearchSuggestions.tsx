@@ -56,8 +56,9 @@ export const SearchSuggestions = () => {
           isLoading={isLoading}
           suggestions={suggestions}
           onSelect={(suggestion) => {
-            setQuery(suggestion.word);
-            setSuggestions([]);
+            console.log(suggestion);
+            // setQuery(suggestion.word);
+            // setSuggestions([]);
           }}
         />
       )}
