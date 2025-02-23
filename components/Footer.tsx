@@ -1,22 +1,37 @@
 export function Footer() {
   return (
-    <footer className="border-t bg-gray-50">
-      <div className="container mx-auto px-4 py-6">
+    <footer>
+      <div className="container mx-auto px-4 py-3">
         <nav>
-          <ul className="flex justify-center gap-8">
+          <ul className="flex justify-center gap-6 text-sm">
             <li>
-              <a href="/about" className="text-gray-600 hover:text-gray-900">
-                About
+              <a
+                href="https://github.com/pinka/dictionary"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-gray-800 hover:underline"
+              >
+                GitHub
               </a>
             </li>
             <li>
-              <a href="/privacy" className="text-gray-600 hover:text-gray-900">
-                Privacy Policy
+              <a
+                href="https://github.com/pinka/dictionary/issues"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-gray-800 hover:underline"
+              >
+                Report
               </a>
             </li>
             <li>
-              <a href="/contact" className="text-gray-600 hover:text-gray-900">
-                Contact
+              <a
+                href="https://github.com/pinka/dictionary/blob/main/CONTRIBUTING.md"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-gray-800 hover:underline"
+              >
+                Contribute
               </a>
             </li>
           </ul>
