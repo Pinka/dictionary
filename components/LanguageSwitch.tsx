@@ -20,7 +20,7 @@ export function LanguageSwitch() {
       <div className="flex justify-center items-center w-full">
         <span
           className={`absolute transition-all duration-300 text-sm ${
-            currentLang === "en" ? "left-4 font-bold" : "right-4 text-gray-500"
+            currentLang === "en" ? "left-4" : "right-4 text-gray-500"
           }`}
         >
           English
@@ -28,7 +28,7 @@ export function LanguageSwitch() {
         <ArrowLeftRight className="h-4 w-4" />
         <span
           className={`absolute transition-all duration-300 text-sm ${
-            currentLang === "mu" ? "left-4 font-bold" : "right-4 text-gray-500"
+            currentLang === "mu" ? "left-4" : "right-4 text-gray-500"
           }`}
         >
           Mauritian

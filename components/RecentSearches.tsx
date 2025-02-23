@@ -2,21 +2,13 @@
 
 import { RecentSearch } from "@/app/actions/recent";
 import { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { useSearchParams } from "next/navigation";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 
 export function RecentSearches() {
   const [recentSearches, setRecentSearches] = useState<RecentSearch[]>([]);
   const searchParams = useSearchParams();
-  const router = useRouter();
 
   const fetchRecentSearches = async () => {
     const response = await fetch("/api/searches/recent");

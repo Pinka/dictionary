@@ -3,7 +3,11 @@
 import { db } from "@/lib/db";
 
 export async function saveSearch(word: string) {
-  if (String(word).trim() === "") return;
+  const trimmedWord = String(word).trim();
+
+  if (trimmedWord === "" || trimmedWord.length < 2) {
+    return;
+  }
 
   await db.execute({
     sql: "INSERT INTO searches (word) VALUES (?)",
