@@ -7,6 +7,7 @@ import { VoiceSearch } from "@/components/VoiceSearch";
 import { Input } from "@/components/ui/input";
 import { addRecentSearch } from "@/lib/recent-searches";
 import { X } from "lucide-react";
+import { Button } from "../ui/button";
 
 export const Search = () => {
   const [query, setQuery] = useState("");
@@ -52,15 +53,17 @@ export const Search = () => {
         autoFocus
       />
       <div className="absolute right-3 top-1/2 -translate-y-1/2">
-        <div className="relative">
+        <div className="relative flex gap-2">
           {query && (
-            <button
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={() => setQuery("")}
-              className="absolute right-[44px] p-2 hover:bg-gray-100 rounded-full"
+              className="h-8 w-8 rounded-full hover:bg-gray-100"
               aria-label="Clear search"
             >
               <X className="h-4 w-4 " />
-            </button>
+            </Button>
           )}
           <VoiceSearch />
         </div>

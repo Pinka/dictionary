@@ -30,6 +30,7 @@ export const VoiceSearch: React.FC<{
         "h-8 w-8 rounded-full hover:bg-gray-100",
         isListening && "text-red-500"
       )}
+      aria-label="Voice search"
     >
       <Mic className="h-4 w-4" />
     </Button>
