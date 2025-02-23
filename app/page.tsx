@@ -4,6 +4,7 @@ import Image from "next/image";
 import backgroundPic from "./background.webp";
 import { SearchSuggestions } from "@/components/search/SearchSuggestions";
 import { WordOfTheDay } from "@/components/WordOfTheDay";
+import { RecentSearches } from "@/components/RecentSearches";
 
 export default function Home() {
   return (
@@ -18,7 +19,6 @@ export default function Home() {
         />
       </div>
       <div className="min-h-screen flex flex-col">
-        {/* Header */}
         <header>
           <div className="container mx-auto px-4 py-4 flex justify-between items-center">
             <div></div>
@@ -26,36 +26,21 @@ export default function Home() {
           </div>
         </header>
 
-        {/* Main Content */}
         <main className="flex-1 container mx-auto px-4 py-12">
           <div className="max-w-2xl mx-auto space-y-8">
-            {/* Search Section */}
             <div className="space-y-6">
               <SearchSuggestions />
-              {/* Language Selector */}
               <div className="flex justify-center gap-4 items-center">
                 <LanguageSwitch />
               </div>
             </div>
 
-            {/* Recent Searches - Only shown when logged in */}
-            <div className="bg-gray-100 p-6 rounded-lg">
-              <h2 className="text-xl font-semibold mb-4">Recent Searches</h2>
-              <ul className="space-y-2">
-                <li className="hover:bg-gray-100 p-2 rounded">
-                  Recent search 1
-                </li>
-                <li className="hover:bg-gray-100 p-2 rounded">
-                  Recent search 2
-                </li>
-              </ul>
-            </div>
+            <RecentSearches />
 
             <WordOfTheDay />
           </div>
         </main>
 
-        {/* Footer */}
         <footer className="border-t bg-gray-50">
           <div className="container mx-auto px-4 py-6">
             <nav>
