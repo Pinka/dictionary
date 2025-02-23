@@ -12,6 +12,6 @@ export async function GET(request: Request) {
     );
   }
 
-  const suggestions = searchDictionary(query);
+  const suggestions = await searchDictionary(query);
   return NextResponse.json(suggestions);
 }

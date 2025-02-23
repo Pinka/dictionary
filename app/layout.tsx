@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
-import dictionary from "@/app/dictionary.json";
 import { CSPostHogProvider } from "./providers";
 
 import "./globals.css";
@@ -18,13 +17,13 @@ const geistMono = localFont({
 
 export const metadata: Metadata = {
   title: "Mauritian Creole to English Dictionary | Translate Creole Words",
-  description: `Explore a comprehensive Mauritian Creole to English dictionary with ${dictionary.length} words. Instantly search and translate between Creole and English to understand the local language better.`,
+  description: `Explore a comprehensive Mauritian Creole to English dictionary. Instantly search and translate between Creole and English to understand the local language better.`,
   robots: "index, follow",
   keywords:
     "Mauritian Creole to English, Creole dictionary, translate Creole, Mauritian language, English to Creole translation, Creole words, Mauritian Creole translation",
   openGraph: {
     title: "Mauritian Creole to English Dictionary",
-    description: `Easily translate Mauritian Creole to English and vice versa with a comprehensive dictionary of ${dictionary.length} words.`,
+    description: `Easily translate Mauritian Creole to English and vice versa with a comprehensive dictionary.`,
     url: "https://lingo.mom",
     type: "website",
   },

@@ -1,22 +1,12 @@
-import wordList from "@/app/word-of-day-list.json";
-
-type WordOfDay = {
-  word: string;
-  desc: string;
-};
-
-type WordList = {
-  [key: string]: WordOfDay;
-};
+import { getWordOfDayFromDB, WordOfDay } from "./db";
 
 const DEFAULT_WORD: WordOfDay = {
   word: "perseverance",
   desc: "Continuing despite difficulties; not giving up",
+  date: new Date().toISOString().split("T")[0],
 };
 
-export function getWordOfDay(): WordOfDay {
-  const today = new Date().toISOString().split("T")[0];
-  const typedWordList = wordList as WordList;
-
-  return typedWordList[today] ?? DEFAULT_WORD;
+export async function getWordOfDay(): Promise<WordOfDay> {
+  const word = await getWordOfDayFromDB();
+  return word ?? DEFAULT_WORD;
 }

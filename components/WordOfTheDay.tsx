@@ -1,7 +1,7 @@
 import { getWordOfDay } from "@/lib/get-word-of-day";
 
 export async function WordOfTheDay() {
-  const wordOfDay = getWordOfDay();
+  const wordOfDay = await getWordOfDay();
 
   return (
     <div className="bg-gray-100 p-6 rounded-lg">
