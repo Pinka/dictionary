@@ -61,7 +61,7 @@ export function Suggestions({
                   <CommandGroup heading="Direct Matches" className="pb-2">
                     {directSuggestions.map((suggestion) => (
                       <CommandItem
-                        key={suggestion.word}
+                        key={`${suggestion.word}-${suggestion.translation}`}
                         value={suggestion.word}
                         onSelect={() => onSelect(suggestion)}
                       >
@@ -83,7 +83,7 @@ export function Suggestions({
                     <CommandGroup heading="Similar Words">
                       {similarSuggestions.map((suggestion) => (
                         <CommandItem
-                          key={suggestion.word}
+                          key={`${suggestion.word}-${suggestion.translation}`}
                           value={suggestion.word}
                           onSelect={() => onSelect(suggestion)}
                         >
