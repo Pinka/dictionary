@@ -1,12 +1,11 @@
 import { searchDictionary } from "@/lib/search";
 import { NextResponse } from "next/server";
-import { checkRateLimit } from "@/lib/rate-limit";
+import { searchRateLimiter } from "@/lib/rate-limit";
 
 export async function GET(request: Request) {
   const ip = request.headers.get("x-forwarded-for") || "anonymous";
 
-  // Check rate limit using existing function
-  const rateLimitResult = await checkRateLimit(ip, "search");
+  const rateLimitResult = await searchRateLimiter.check(ip);
   if (!rateLimitResult.success) {
     return NextResponse.json(
       {

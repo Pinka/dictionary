@@ -3,7 +3,7 @@
 import { createGitHubIssue } from "@/lib/github";
 import { headers } from "next/headers";
 import { sanitizeInput } from "@/lib/sanitize";
-import { checkRateLimit } from "@/lib/rate-limit";
+import { submissionRateLimiter } from "@/lib/rate-limit";
 
 interface WordSubmission {
   mauritian: string;
@@ -22,8 +22,7 @@ export async function submitWord({ mauritian, english }: WordSubmission) {
     // Get client IP for rate limiting
     const identifier = (await headers()).get("x-forwarded-for") || "anonymous";
 
-    // Check rate limit
-    const rateLimitResult = await checkRateLimit(identifier, "submission");
+    const rateLimitResult = await submissionRateLimiter.check(identifier);
     if (!rateLimitResult.success) {
       return {
         success: false,
