@@ -13,6 +13,20 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 
+// Add global type declarations for Web Speech API
+declare global {
+  interface Window {
+    SpeechRecognition?: {
+      new (): SpeechRecognition;
+      prototype: SpeechRecognition;
+    };
+    webkitSpeechRecognition?: {
+      new (): SpeechRecognition;
+      prototype: SpeechRecognition;
+    };
+  }
+}
+
 // Define speech recognition types
 interface SpeechRecognitionEvent extends Event {
   results: SpeechRecognitionResultList;
@@ -183,12 +197,14 @@ export const VoiceSearch: React.FC<{
       stream.getTracks().forEach((track) => track.stop());
       setPermissionState("granted");
       setShowPermissionDialog(false);
+      return true;
     } catch (err) {
       console.error("Failed to get microphone permission:", err);
       setPermissionState("denied");
       setErrorMessage(
         "Microphone permission denied. Please allow access in your browser settings."
       );
+      return false;
     } finally {
       setIsLoading(false);
     }
@@ -208,6 +224,21 @@ export const VoiceSearch: React.FC<{
       return;
     }
 
+    // Start listening
+    const startListening = () => {
+      if (!recognition) return;
+
+      setIsLoading(true);
+      try {
+        recognition.start();
+        setIsListening(true);
+      } catch (err) {
+        console.error("Failed to start speech recognition", err);
+        setErrorMessage("Failed to start voice recognition");
+        setIsLoading(false);
+      }
+    };
+
     // If currently listening, stop
     if (isListening) {
       recognition.stop();
@@ -223,8 +254,9 @@ export const VoiceSearch: React.FC<{
     }
 
     if (permissionState === "prompt") {
-      requestMicrophonePermission().then((result) => {
-        if (permissionState === "granted") {
+      requestMicrophonePermission().then((success) => {
+        // Start listening if permission was granted
+        if (success) {
           startListening();
         }
       });
@@ -233,22 +265,7 @@ export const VoiceSearch: React.FC<{
 
     // Permission already granted
     startListening();
-  }, [isListening, recognition, permissionState]);
-
-  // Start listening
-  const startListening = () => {
-    if (!recognition) return;
-
-    setIsLoading(true);
-    try {
-      recognition.start();
-      setIsListening(true);
-    } catch (err) {
-      console.error("Failed to start speech recognition", err);
-      setErrorMessage("Failed to start voice recognition");
-      setIsLoading(false);
-    }
-  };
+  }, [recognition, isListening, permissionState]);
 
   // Clear error message after 5 seconds
   useEffect(() => {
@@ -321,7 +338,7 @@ export const VoiceSearch: React.FC<{
               <li>
                 Look for the camera/microphone icon in your browser address bar
               </li>
-              <li>Click on it and select "Allow" for microphone</li>
+              <li>Click on it and select &quot;Allow&quot; for microphone</li>
               <li>Refresh the page after changing permissions</li>
             </ol>
           </div>
