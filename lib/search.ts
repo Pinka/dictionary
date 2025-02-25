@@ -1,4 +1,5 @@
 import { searchTranslations } from "./db";
+import { sanitizeInput } from "./sanitize";
 
 export interface DictionaryEntry {
   word: string;
@@ -11,7 +12,9 @@ export async function searchDictionary(
 ): Promise<DictionaryEntry[]> {
   if (!query || query.length < 2) return [];
 
-  const translations = await searchTranslations(query.toLowerCase().trim());
+  const sanitizedQuery = sanitizeInput(query).toLowerCase();
+
+  const translations = await searchTranslations(sanitizedQuery);
 
   return translations.map((t) => ({
     word: t.en,

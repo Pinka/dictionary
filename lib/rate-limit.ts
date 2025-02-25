@@ -7,8 +7,8 @@ interface RateLimitConfig {
 }
 
 const RATE_LIMIT_CONFIG: RateLimitConfig = {
-  interval: 3600, // 1 hour
-  limit: 10, // 10 requests per hour
+  interval: 600, // 10 minutes
+  limit: 1000, // 1000 requests per 10 minutes
 };
 
 export async function checkRateLimit(identifier: string) {

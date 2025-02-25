@@ -23,12 +23,13 @@ export async function submitWord({ mauritian, english }: WordSubmission) {
     const identifier = (await headers()).get("x-forwarded-for") || "anonymous";
 
     // Check rate limit
-    const rateLimitResult = await checkRateLimit(identifier);
+    const rateLimitResult = await checkRateLimit(identifier, "submission");
     if (!rateLimitResult.success) {
       return {
         success: false,
         error: "Too many requests. Please try again later.",
         reset: rateLimitResult.reset,
+        remaining: rateLimitResult.remaining,
       };
     }
 
