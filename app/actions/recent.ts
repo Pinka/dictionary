@@ -1,13 +1,14 @@
 "use server";
 
 import { db } from "@/lib/db";
+import { unstable_cache } from "next/cache";
 
 export interface RecentSearch {
   word: string;
   timestamp: string;
 }
 
-export async function getRecentSearches(limit = 5): Promise<RecentSearch[]> {
+async function fetchRecentSearches(limit = 5): Promise<RecentSearch[]> {
   const result = await db.execute({
     sql: `
       WITH ranked_searches AS (
@@ -38,3 +39,9 @@ export async function getRecentSearches(limit = 5): Promise<RecentSearch[]> {
   console.log(result.rows);
   return result.rows as unknown as RecentSearch[];
 }
+
+export const getRecentSearches = unstable_cache(
+  fetchRecentSearches,
+  ["recent-searches"],
+  { revalidate: 60 }
+);
