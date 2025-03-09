@@ -7,7 +7,7 @@ import { X } from "lucide-react";
 import { Button } from "../ui/button";
 import { useRouter, useSearchParams } from "next/navigation";
 import { saveSearch } from "@/app/actions/search";
-import { Suspense } from "react";
+import { Suspense, useRef } from "react";
 
 let queryTimer: NodeJS.Timeout | undefined = undefined;
 
@@ -15,6 +15,7 @@ let queryTimer: NodeJS.Timeout | undefined = undefined;
 const SearchContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const query = searchParams.get("q") ?? "";
 
@@ -35,9 +36,22 @@ const SearchContent = () => {
     }, 500);
   };
 
+  const handleClear = () => {
+    // Clear the input field value
+    if (inputRef.current) {
+      inputRef.current.value = "";
+    }
+
+    // Update URL parameters
+    const newParams = new URLSearchParams(window.location.search);
+    newParams.delete("q");
+    router.push(`?${newParams.toString()}`);
+  };
+
   return (
     <div className="relative">
       <Input
+        ref={inputRef}
         type="text"
         placeholder="Search for a word..."
         className="w-full pl-4 pr-24 py-6 text-lg rounded-full"
@@ -51,11 +65,7 @@ const SearchContent = () => {
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => {
-                const newParams = new URLSearchParams(window.location.search);
-                newParams.delete("q");
-                router.push(`?${newParams.toString()}`);
-              }}
+              onClick={handleClear}
               className="h-8 w-8 rounded-full hover:bg-gray-100"
               aria-label="Clear search"
             >
