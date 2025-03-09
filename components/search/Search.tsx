@@ -7,10 +7,12 @@ import { X } from "lucide-react";
 import { Button } from "../ui/button";
 import { useRouter, useSearchParams } from "next/navigation";
 import { saveSearch } from "@/app/actions/search";
+import { Suspense } from "react";
 
 let queryTimer: NodeJS.Timeout | undefined = undefined;
 
-export const Search = () => {
+// Inner component that uses useSearchParams
+const SearchContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -65,5 +67,30 @@ export const Search = () => {
       </div>
       {query.length > 1 && <Suggestions />}
     </div>
+  );
+};
+
+// Wrapper component with Suspense
+export const Search = () => {
+  return (
+    <Suspense
+      fallback={
+        <div className="relative">
+          <Input
+            type="text"
+            placeholder="Search for a word..."
+            className="w-full pl-4 pr-24 py-6 text-lg rounded-full"
+            disabled
+          />
+          <div className="absolute right-3 top-1/2 -translate-y-1/2">
+            <div className="relative flex gap-2">
+              <VoiceSearch />
+            </div>
+          </div>
+        </div>
+      }
+    >
+      <SearchContent />
+    </Suspense>
   );
 };
